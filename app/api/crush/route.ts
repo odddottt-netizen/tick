@@ -66,20 +66,28 @@ export async function POST(req: Request) {
   //
   // ──────────────────────────────────────────────────────────────────────────
 
-  const msg = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 600, // ③ 출력 토큰 상한 — JSON 구조상 600이면 충분
-    system: `사용자의 할 일을 Phase ${phaseCount}개 × Sub-task ${taskCount}개로 분해.
+  let msg: Awaited<ReturnType<typeof client.messages.create>>
+  try {
+    msg = await client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 600,
+      system: `사용자의 할 일을 Phase ${phaseCount}개 × Sub-task ${taskCount}개로 분해.
 각 Sub-task는 5분 안에 시작 가능한 구체적 행동. 압박 표현 금지.
 순수 JSON만 반환: {"phases":[{"number":"01","title":"...","tasks":["..."]}]}`,
-    messages: [{ role: 'user', content: task }],
-  })
+      messages: [{ role: 'user', content: task }],
+    })
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e)
+    console.error('[crush] Anthropic error:', message)
+    return Response.json({ error: 'Anthropic API failed', detail: message }, { status: 502 })
+  }
 
   const raw  = (msg.content[0] as { text: string }).text
   const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
   try {
     return Response.json(JSON.parse(text))
   } catch {
+    console.error('[crush] JSON parse failed, raw output:', raw)
     return Response.json({ error: 'Parse failed' }, { status: 502 })
   }
 }
