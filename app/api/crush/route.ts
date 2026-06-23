@@ -43,6 +43,8 @@ export async function POST(req: Request) {
     messages: [{ role: 'user', content: task }],
   })
 
-  const text = (msg.content[0] as { text: string }).text
+  const raw = (msg.content[0] as { text: string }).text
+  // 마크다운 코드블록 제거 후 파싱
+  const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
   return Response.json(JSON.parse(text))
 }
