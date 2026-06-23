@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Plus, Trash2, Check, Scissors, Volume2, VolumeX, Copy } from 'lucide-react'
+import { Plus, Trash2, Check, Scissors, Volume2, VolumeX, Copy, Download, Upload, Settings } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,6 +30,7 @@ interface ViewProps {
   soundType: SoundType; setSoundType: (t: SoundType) => void
   muted: boolean; setMuted: (v: boolean | ((p: boolean) => boolean)) => void
   volume: number; setVolume: (v: number) => void
+  companyName: string; deptName: string
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -49,6 +50,11 @@ const PARTICLE_COLORS = [
   '#EA580C','#FB923C','#FED7AA',
   '#DC2626','#F97316','#FBBF24',
   '#78716C','#A8A29E',
+]
+
+const CONFETTI_COLORS = [
+  '#EA580C','#FB923C','#FED7AA','#DC2626','#F97316','#FBBF24',
+  '#4ADE80','#60A5FA','#A78BFA','#F472B6','#34D399','#FACC15',
 ]
 
 const SOUND_LABELS: Record<SoundType, string> = {
@@ -173,7 +179,6 @@ function playSound(type: SoundType, muted: boolean, volume: number) {
     const ctx = new AudioCtx() as AudioContext
 
     if (type === 'keyboard') {
-      // 청축: sharp high-freq noise burst + square wave click
       const len = Math.floor(ctx.sampleRate * 0.06)
       const buf = ctx.createBuffer(1, len, ctx.sampleRate)
       const d   = buf.getChannelData(0)
@@ -189,7 +194,6 @@ function playSound(type: SoundType, muted: boolean, volume: number) {
       osc.connect(g2); g2.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.03)
 
     } else if (type === 'wax') {
-      // 왁스볼: sparse crackle with highshelf crispy envelope
       const dur = 0.2
       const len = Math.floor(ctx.sampleRate * dur)
       const buf = ctx.createBuffer(1, len, ctx.sampleRate)
@@ -206,7 +210,6 @@ function playSound(type: SoundType, muted: boolean, volume: number) {
       src.connect(hs); hs.connect(g); g.connect(ctx.destination); src.start(); src.stop(ctx.currentTime + dur + 0.01)
 
     } else if (type === 'crystal') {
-      // 크리스탈 종: chord of sines with long reverb tail
       const tone = (freq: number, delay: number, dur: number, v: number) => {
         const osc = ctx.createOscillator(); const g = ctx.createGain()
         osc.type = 'sine'; osc.frequency.value = freq
@@ -221,7 +224,6 @@ function playSound(type: SoundType, muted: boolean, volume: number) {
       tone(2093,   0.03, 0.65, 0.03)
 
     } else if (type === 'pencil') {
-      // 연필 사각: lowpass noise streak with bell-curve envelope
       const dur = 0.18
       const len = Math.floor(ctx.sampleRate * dur)
       const buf = ctx.createBuffer(1, len, ctx.sampleRate)
@@ -236,7 +238,6 @@ function playSound(type: SoundType, muted: boolean, volume: number) {
       src.connect(lp); lp.connect(g); g.connect(ctx.destination); src.start(); src.stop(ctx.currentTime + dur + 0.01)
 
     } else {
-      // 뽁뽁이: transient air-pocket pop — sharp attack, instant decay
       const len = Math.floor(ctx.sampleRate * 0.04)
       const buf = ctx.createBuffer(1, len, ctx.sampleRate)
       const d   = buf.getChannelData(0)
@@ -251,6 +252,49 @@ function playSound(type: SoundType, muted: boolean, volume: number) {
     }
 
     setTimeout(() => ctx.close(), 2500)
+  } catch {}
+}
+
+// ─── Ta-da Victory Fanfare (C5→E5→G5→C6 arpeggio, pure sine waves) ───────────
+
+function playTaDa(muted: boolean, volume: number) {
+  if (muted) return
+  const vol = Math.max(0, Math.min(1, volume))
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    if (!AudioCtx) return
+    const ctx = new AudioCtx() as AudioContext
+
+    const notes = [
+      { freq: 523.25, delay: 0,    dur: 0.18 }, // C5
+      { freq: 659.25, delay: 0.13, dur: 0.18 }, // E5
+      { freq: 783.99, delay: 0.26, dur: 0.18 }, // G5
+      { freq: 1046.5, delay: 0.39, dur: 0.65 }, // C6 — 롱톤 마무리
+    ]
+    for (const note of notes) {
+      const osc = ctx.createOscillator()
+      const g   = ctx.createGain()
+      osc.type = 'sine'; osc.frequency.value = note.freq
+      g.gain.setValueAtTime(0, ctx.currentTime + note.delay)
+      g.gain.linearRampToValueAtTime(0.28 * vol, ctx.currentTime + note.delay + 0.02)
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + note.delay + note.dur)
+      osc.connect(g); g.connect(ctx.destination)
+      osc.start(ctx.currentTime + note.delay)
+      osc.stop(ctx.currentTime + note.delay + note.dur + 0.01)
+    }
+    // E5 + G5 화음으로 마지막 C6에 두께 추가
+    for (const freq of [659.25, 783.99]) {
+      const osc = ctx.createOscillator()
+      const g   = ctx.createGain()
+      osc.type = 'sine'; osc.frequency.value = freq
+      g.gain.setValueAtTime(0, ctx.currentTime + 0.39)
+      g.gain.linearRampToValueAtTime(0.07 * vol, ctx.currentTime + 0.41)
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.98)
+      osc.connect(g); g.connect(ctx.destination)
+      osc.start(ctx.currentTime + 0.39); osc.stop(ctx.currentTime + 1.0)
+    }
+    setTimeout(() => ctx.close(), 2200)
   } catch {}
 }
 
@@ -286,8 +330,11 @@ function ExcelView(p: ViewProps) {
     for (const task of phase.subTasks) { rows.push({ kind: 'task', phase, task, rowNum }); rowNum++ }
   }
 
-  const ribbon = ['파일','홈','삽입','그리기','페이지 레이아웃','수식','데이터','검토','보기','자동화']
-  const cols   = ['A','B','C','D','E','F']
+  const ribbon    = ['파일','홈','삽입','그리기','페이지 레이아웃','수식','데이터','검토','보기','자동화']
+  const cols      = ['A','B','C','D','E','F']
+  const userLabel = p.companyName
+    ? `${p.companyName}${p.deptName ? ` · ${p.deptName}` : ''}`
+    : '사내 내부망'
 
   return (
     <div style={{ display:'flex', flexDirection:'column', flex:1, minHeight:0, fontFamily:'"Malgun Gothic","맑은 고딕",Arial,sans-serif', fontSize:'12px', background:'#fff' }}>
@@ -415,7 +462,7 @@ function ExcelView(p: ViewProps) {
           </tbody>
         </table>
       </div>
-      {/* Status bar — volume slider disguised as zoom control */}
+      {/* Status bar — company info + volume slider disguised as zoom */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'2px 8px', background:'#f0f0f0', borderTop:'1px solid #d0d0d0', fontSize:'11px', color:'#555', flexShrink:0 }}>
         <div style={{ display:'flex', gap:'0' }}>
           {['Sheet1','Sheet2','Sheet3'].map((s,i) => (
@@ -424,6 +471,8 @@ function ExcelView(p: ViewProps) {
           <button style={{ padding:'2px 8px', background:'transparent', border:'none', cursor:'default', fontSize:'13px', color:'#888' }}>+</button>
         </div>
         <div style={{ display:'flex', gap:'8px', color:'#888', fontSize:'10px', alignItems:'center' }}>
+          <span style={{ color:'#555', fontWeight:500 }}>사용자: {userLabel}</span>
+          <span style={{ color:'#ccc' }}>|</span>
           <span>개수 {p.totalCount}</span>
           <span>합계 {p.completedCount}</span>
           <button onClick={p.handleReset} title="데이터 초기화" style={{ background:'transparent', border:'none', cursor:'pointer', color:'#bbb', fontSize:'10px', fontFamily:'inherit' }}>초기화</button>
@@ -448,6 +497,9 @@ function NotionView(p: ViewProps) {
   const totalRows = allTasks.length
   const today = new Date().toLocaleDateString('ko-KR',{ month:'2-digit', day:'2-digit' }).replace(/\.\s*/g,'/').replace(/\/$/,'')
 
+  const workspaceName = p.companyName || '내 작업공간'
+  const ownerLabel    = p.deptName    || '전략기획팀'
+
   const StatusTag = ({ completed }: { completed: boolean }) => {
     const bg    = completed ? '#d3f9d8' : '#dbe4ff'
     const color = completed ? '#2f9e44' : '#3b5bdb'
@@ -460,7 +512,7 @@ function NotionView(p: ViewProps) {
       <div style={{ width:'220px', background:'#f7f6f5', borderRight:'1px solid #e9e9e7', display:'flex', flexDirection:'column', fontSize:'13px', color:'#37352f', flexShrink:0, overflow:'auto' }}>
         <div style={{ display:'flex', alignItems:'center', padding:'10px 12px', gap:'8px', borderBottom:'1px solid #e9e9e7' }}>
           <div style={{ width:'24px', height:'24px', background:'#e8d5c4', borderRadius:'4px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'13px' }}>🗂️</div>
-          <span style={{ fontWeight:600, fontSize:'13px' }}>내 작업공간</span>
+          <span style={{ fontWeight:600, fontSize:'13px' }}>{workspaceName}</span>
           <span style={{ marginLeft:'auto', color:'#9b9a97', cursor:'default', fontSize:'16px' }}>···</span>
         </div>
         <div style={{ padding:'6px 4px' }}>
@@ -477,8 +529,9 @@ function NotionView(p: ViewProps) {
             </div>
           ))}
         </div>
-        {/* Donation disguised as plan label */}
+        {/* Footer: company owner + donation disguise */}
         <div style={{ marginTop:'auto', padding:'10px 12px', borderTop:'1px solid #e9e9e7', fontSize:'10px', color:'#b7b7b4' }}>
+          <span style={{ display:'block', marginBottom:'2px' }}>소유자: {ownerLabel}</span>
           <a href="https://toss.me/your-id" target="_blank" rel="noopener noreferrer" style={{ color:'#b7b7b4', textDecoration:'none', display:'block' }}>준비 완료</a>
           <span>개인 플랜 · 무료</span>
         </div>
@@ -575,6 +628,46 @@ function NotionView(p: ViewProps) {
   )
 }
 
+// ─── Company Settings Modal ───────────────────────────────────────────────────
+
+function CompanySettingsModal({
+  companyName, deptName, onSave, onClose,
+}: {
+  companyName: string; deptName: string
+  onSave: (c: string, d: string) => void; onClose: () => void
+}) {
+  const [c, setC] = useState(companyName)
+  const [d, setD] = useState(deptName)
+
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:1100, background:'rgba(0,0,0,0.32)', display:'flex', alignItems:'center', justifyContent:'center' }}
+         onClick={e => { if (e.target===e.currentTarget) onClose() }}>
+      <div style={{ background:'#fff', borderRadius:'6px', padding:'20px', width:'320px', boxShadow:'0 8px 32px rgba(0,0,0,0.2)', fontFamily:'"Malgun Gothic","맑은 고딕",Arial,sans-serif', maxWidth:'90vw' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px' }}>
+          <h3 style={{ margin:0, fontSize:'13px', fontWeight:700, color:'#333' }}>⚙️ 위장 정보 설정</h3>
+          <button onClick={onClose} style={{ background:'none', border:'none', cursor:'pointer', fontSize:'18px', color:'#888', lineHeight:1 }}>×</button>
+        </div>
+        <p style={{ fontSize:'11px', color:'#888', marginBottom:'14px', lineHeight:'1.7' }}>
+          상사가 지나갈 때 더 완벽한 위장을 위해 실제 소속 정보를 입력하세요.
+        </p>
+        <label style={{ fontSize:'12px', color:'#555', display:'block', marginBottom:'4px' }}>회사명</label>
+        <input value={c} onChange={e => setC(e.target.value)} placeholder="예: 삼성전자"
+          style={{ width:'100%', border:'1px solid #ddd', borderRadius:'3px', padding:'7px 10px', fontSize:'12px', marginBottom:'10px', boxSizing:'border-box', outline:'none', fontFamily:'inherit' }} />
+        <label style={{ fontSize:'12px', color:'#555', display:'block', marginBottom:'4px' }}>부서명</label>
+        <input value={d} onChange={e => setD(e.target.value)} placeholder="예: 전략기획팀"
+          style={{ width:'100%', border:'1px solid #ddd', borderRadius:'3px', padding:'7px 10px', fontSize:'12px', marginBottom:'18px', boxSizing:'border-box', outline:'none', fontFamily:'inherit' }} />
+        <div style={{ display:'flex', gap:'8px', justifyContent:'flex-end' }}>
+          <button onClick={onClose} style={{ padding:'6px 16px', border:'1px solid #ddd', borderRadius:'3px', background:'#f5f5f5', fontSize:'12px', cursor:'pointer', fontFamily:'inherit' }}>취소</button>
+          <button onClick={() => { onSave(c.trim(), d.trim()); onClose() }}
+            style={{ padding:'6px 16px', border:'none', borderRadius:'3px', background:'#1f5c8b', color:'#fff', fontSize:'12px', cursor:'pointer', fontFamily:'inherit' }}>
+            저장
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Feedback Modal ───────────────────────────────────────────────────────────
 
 function FeedbackModal({ onClose, isOffice }: { onClose: () => void; isOffice: boolean }) {
@@ -652,28 +745,40 @@ function FeedbackModal({ onClose, isOffice }: { onClose: () => void; isOffice: b
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Tick() {
-  const [phases,          setPhases]          = useState<Phase[]>([])
-  const [mainTask,        setMainTask]        = useState('')
-  const [granularity,     setGranularity]     = useState(2)
-  const [appState,        setAppState]        = useState<AppState>('default')
-  const [microcopyIdx,    setMicrocopyIdx]    = useState(0)
-  const [particles,       setParticles]       = useState<Particle[]>([])
-  const [showCelebration, setShowCelebration] = useState(false)
-  const [editingId,       setEditingId]       = useState<number | null>(null)
-  const [editText,        setEditText]        = useState('')
-  const [themeMode,       setThemeMode]       = useState<ThemeMode>('daily')
-  const [officeTab,       setOfficeTab]       = useState<OfficeTab>('excel')
-  const [soundType,       setSoundType]       = useState<SoundType>('keyboard')
-  const [muted,           setMuted]           = useState(false)
-  const [volume,          setVolume]          = useState(0.7)
-  const [bossMode,        setBossMode]        = useState(false)
-  const [copied,          setCopied]          = useState(false)
-  const [showFeedback,    setShowFeedback]    = useState(false)
+  const [phases,              setPhases]              = useState<Phase[]>([])
+  const [mainTask,            setMainTask]            = useState('')
+  const [granularity,         setGranularity]         = useState(2)
+  const [appState,            setAppState]            = useState<AppState>('default')
+  const [microcopyIdx,        setMicrocopyIdx]        = useState(0)
+  const [particles,           setParticles]           = useState<Particle[]>([])
+  const [showMissionClear,    setShowMissionClear]    = useState(false)
+  const [editingId,           setEditingId]           = useState<number | null>(null)
+  const [editText,            setEditText]            = useState('')
+  const [themeMode,           setThemeMode]           = useState<ThemeMode>('daily')
+  const [officeTab,           setOfficeTab]           = useState<OfficeTab>('excel')
+  const [soundType,           setSoundType]           = useState<SoundType>('keyboard')
+  const [muted,               setMuted]               = useState(false)
+  const [volume,              setVolume]              = useState(0.7)
+  const [bossMode,            setBossMode]            = useState(false)
+  const [copied,              setCopied]              = useState(false)
+  const [showFeedback,        setShowFeedback]        = useState(false)
+  const [companyName,         setCompanyName]         = useState('')
+  const [deptName,            setDeptName]            = useState('')
+  const [showCompanySettings, setShowCompanySettings] = useState(false)
 
-  const editInputRef  = useRef<HTMLInputElement>(null)
-  const particleIdRef = useRef(0)
-  const escCountRef   = useRef(0)
-  const escTimerRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const editInputRef    = useRef<HTMLInputElement>(null)
+  const particleIdRef   = useRef(0)
+  const escCountRef     = useRef(0)
+  const escTimerRef     = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const canvasRef       = useRef<HTMLCanvasElement>(null)
+  const confettiRafRef  = useRef<number>(0)
+  const celebratedRef   = useRef(false)
+  const importInputRef  = useRef<HTMLInputElement>(null)
+  const mutedRef        = useRef(muted)
+  const volumeRef       = useRef(volume)
+
+  useEffect(() => { mutedRef.current = muted }, [muted])
+  useEffect(() => { volumeRef.current = volume }, [volume])
 
   useEffect(() => {
     setMicrocopyIdx(Math.floor(Math.random() * MICROCOPIES.length))
@@ -681,12 +786,22 @@ export default function Tick() {
     return () => clearInterval(id)
   }, [])
 
+  // Restore tasks + settings from localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem('tc-v2')
-      if (!saved) return
-      const { phases: p, mainTask: m } = JSON.parse(saved)
-      if (Array.isArray(p) && p.length > 0) { setPhases(p); setMainTask(m ?? ''); setAppState('result') }
+      if (saved) {
+        const { phases: p, mainTask: m } = JSON.parse(saved)
+        if (Array.isArray(p) && p.length > 0) { setPhases(p); setMainTask(m ?? ''); setAppState('result') }
+      }
+    } catch {}
+    try {
+      const settings = localStorage.getItem('tc-settings')
+      if (settings) {
+        const { c, d } = JSON.parse(settings)
+        if (c) setCompanyName(c)
+        if (d) setDeptName(d)
+      }
     } catch {}
   }, [])
 
@@ -718,18 +833,97 @@ export default function Tick() {
     return () => window.removeEventListener('keydown', onKey)
   }, [bossMode])
 
+  useEffect(() => () => cancelAnimationFrame(confettiRafRef.current), [])
+
   const allTasks       = phases.flatMap(ph => ph.subTasks)
   const completedCount = allTasks.filter(t => t.completed).length
   const totalCount     = allTasks.length
   const progress       = totalCount === 0 ? 0 : (completedCount / totalCount) * 100
 
-  useEffect(() => {
-    if (progress >= 100 && totalCount > 0) {
-      setShowCelebration(true)
-      const t = setTimeout(() => setShowCelebration(false), 4000)
-      return () => clearTimeout(t)
+  // ── Grand confetti canvas ──────────────────────────────────────────────────
+
+  const launchGrandConfetti = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    cancelAnimationFrame(confettiRafRef.current)
+    canvas.width  = window.innerWidth
+    canvas.height = window.innerHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const c = ctx // non-null alias for closure
+
+    const W = canvas.width, H = canvas.height
+
+    interface ConfettiP {
+      x: number; y: number; vx: number; vy: number
+      color: string; w: number; h: number; rot: number; rotV: number; isRect: boolean
     }
-  }, [progress, totalCount])
+
+    const particles2: ConfettiP[] = []
+    const launchY = H * 0.72
+    for (const sx of [W * 0.12, W * 0.5, W * 0.88]) {
+      for (let i = 0; i < 65; i++) {
+        const spread = sx === W * 0.5 ? 1.1 : 0.75
+        const a   = -Math.PI / 2 + (Math.random() - 0.5) * spread
+        const spd = 11 + Math.random() * 14
+        particles2.push({
+          x: sx + (Math.random() - 0.5) * 30, y: launchY,
+          vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
+          color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+          w: 7 + Math.random() * 10, h: 4 + Math.random() * 5,
+          rot: Math.random() * 360, rotV: (Math.random() - 0.5) * 14,
+          isRect: Math.random() > 0.35,
+        })
+      }
+    }
+
+    const startTime = performance.now()
+    const duration  = 4200
+
+    function tick(now: number) {
+      const elapsed = now - startTime
+      const alpha   = Math.max(0, 1 - elapsed / duration)
+      c.clearRect(0, 0, W, H)
+      for (const p of particles2) {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.28; p.vx *= 0.995; p.rot += p.rotV
+        c.save()
+        c.globalAlpha = alpha
+        c.translate(p.x, p.y)
+        c.rotate(p.rot * Math.PI / 180)
+        c.fillStyle = p.color
+        if (p.isRect) {
+          c.fillRect(-p.w / 2, -p.h / 2, p.w, p.h)
+        } else {
+          c.beginPath()
+          c.ellipse(0, 0, p.w / 2, p.h / 2, 0, 0, Math.PI * 2)
+          c.fill()
+        }
+        c.restore()
+      }
+      if (elapsed < duration) {
+        confettiRafRef.current = requestAnimationFrame(tick)
+      } else {
+        c.clearRect(0, 0, W, H)
+      }
+    }
+    confettiRafRef.current = requestAnimationFrame(tick)
+  }, [])
+
+  // ── 100% completion trigger ────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (progress >= 100 && totalCount > 0 && !celebratedRef.current) {
+      celebratedRef.current = true
+      setShowMissionClear(true)
+      playTaDa(mutedRef.current, volumeRef.current)
+      launchGrandConfetti()
+    }
+    if (progress < 100) {
+      celebratedRef.current = false
+    }
+  }, [progress, totalCount, launchGrandConfetti])
+
+  // ── Click-particle burst ───────────────────────────────────────────────────
 
   const spawnParticles = useCallback((cx: number, cy: number) => {
     const burst: Particle[] = Array.from({ length: 10 }, (_, i) => {
@@ -747,21 +941,59 @@ export default function Tick() {
     setTimeout(() => setParticles(prev => prev.filter(p => !burst.find(b => b.id === p.id))), 850)
   }, [])
 
-  // ── [LLM API 연결 지점] ───────────────────────────────────────────────────
-  // handleCrush / handlePreset 내부의 setTimeout 전체를 fetch('/api/crush') 호출로 교체.
-  // app/api/crush/route.ts 구현 코드는 파일 하단 주석 참고.
-  // ────────────────────────────────────────────────────────────────────────
-  const handleCrush = useCallback(() => {
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  // [LLM API 연결] — fetch('/api/crush') 호출 + API 실패 시 목 데이터 폴백
+  const handleCrush = useCallback(async () => {
     if (!mainTask.trim()) return
-    setAppState('loading'); setPhases([]); setShowCelebration(false); setEditingId(null)
-    setTimeout(() => { setPhases(generatePhases(mainTask, granularity)); setAppState('result') }, 1400)
+    setAppState('loading'); setPhases([]); setShowMissionClear(false); setEditingId(null)
+    celebratedRef.current = false
+    try {
+      const res  = await fetch('/api/crush', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task: mainTask, level: granularity }),
+      })
+      if (!res.ok) throw new Error('API error')
+      const data = await res.json()
+      const now  = Date.now()
+      setPhases(data.phases.map(
+        (ph: { number: string; title: string; tasks: string[] }, i: number) => ({
+          id: now + i, number: ph.number, title: ph.title,
+          subTasks: ph.tasks.map((text: string, j: number) => ({ id: now + i * 100 + j, text, completed: false })),
+        })
+      ))
+      setAppState('result')
+    } catch {
+      setPhases(generatePhases(mainTask, granularity))
+      setAppState('result')
+    }
   }, [mainTask, granularity])
 
-  // Preset: passes value directly to avoid stale closure on mainTask
-  const handlePreset = useCallback((value: string) => {
+  const handlePreset = useCallback(async (value: string) => {
     setMainTask(value)
-    setAppState('loading'); setPhases([]); setShowCelebration(false); setEditingId(null)
-    setTimeout(() => { setPhases(generatePhases(value, granularity)); setAppState('result') }, 1400)
+    setAppState('loading'); setPhases([]); setShowMissionClear(false); setEditingId(null)
+    celebratedRef.current = false
+    try {
+      const res  = await fetch('/api/crush', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task: value, level: granularity }),
+      })
+      if (!res.ok) throw new Error('API error')
+      const data = await res.json()
+      const now  = Date.now()
+      setPhases(data.phases.map(
+        (ph: { number: string; title: string; tasks: string[] }, i: number) => ({
+          id: now + i, number: ph.number, title: ph.title,
+          subTasks: ph.tasks.map((text: string, j: number) => ({ id: now + i * 100 + j, text, completed: false })),
+        })
+      ))
+      setAppState('result')
+    } catch {
+      setPhases(generatePhases(value, granularity))
+      setAppState('result')
+    }
   }, [granularity])
 
   const handleToggle = useCallback((phaseId: number, taskId: number, e: React.MouseEvent) => {
@@ -797,7 +1029,11 @@ export default function Tick() {
   }, [editingId, editText])
 
   const handleReset = useCallback(() => {
-    setPhases([]); setMainTask(''); setAppState('default'); setShowCelebration(false)
+    setPhases([]); setMainTask(''); setAppState('default'); setShowMissionClear(false)
+    celebratedRef.current = false
+    cancelAnimationFrame(confettiRafRef.current)
+    const ctx = canvasRef.current?.getContext('2d')
+    if (ctx && canvasRef.current) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
     localStorage.removeItem('tc-v2')
   }, [])
 
@@ -807,12 +1043,48 @@ export default function Tick() {
     })
   }, [phases, mainTask])
 
+  // ── Backup / Restore ──────────────────────────────────────────────────────
+
+  const handleExport = useCallback(() => {
+    const data = { version: 2, mainTask, phases, exportedAt: new Date().toISOString() }
+    const blob  = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url   = URL.createObjectURL(blob)
+    const a     = document.createElement('a')
+    a.href = url; a.download = `tick-backup-${new Date().toISOString().slice(0,10)}.json`
+    document.body.appendChild(a); a.click()
+    document.body.removeChild(a); URL.revokeObjectURL(url)
+  }, [mainTask, phases])
+
+  const handleImportFile = useCallback((file: File) => {
+    const reader = new FileReader()
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target?.result as string)
+        if (Array.isArray(data.phases) && data.phases.length > 0) {
+          setPhases(data.phases); setMainTask(data.mainTask ?? ''); setAppState('result')
+          celebratedRef.current = false
+        } else {
+          alert('유효한 Tick. 백업 파일이 아닙니다.')
+        }
+      } catch {
+        alert('파일을 읽는 데 실패했습니다. JSON 형식을 확인해 주세요.')
+      }
+    }
+    reader.readAsText(file)
+  }, [])
+
+  const handleSaveCompanySettings = useCallback((c: string, d: string) => {
+    setCompanyName(c); setDeptName(d)
+    try { localStorage.setItem('tc-settings', JSON.stringify({ c, d })) } catch {}
+  }, [])
+
   const viewProps: ViewProps = {
     phases, mainTask, granularity, appState, progress, completedCount, totalCount,
     setMainTask, setGranularity, handleCrush, handleToggle, handleDeleteTask,
     handleAddTask, handleReset, handleCopyMarkdown, editingId, editText,
     editInputRef, setEditingId, setEditText, handleSaveEdit, copied,
     soundType, setSoundType, muted, setMuted, volume, setVolume,
+    companyName, deptName,
   }
 
   // ── Boss Mode ─────────────────────────────────────────────────────────────
@@ -854,11 +1126,15 @@ export default function Tick() {
               {tab==='excel' ? '📊 Excel 뷰' : '⬜ Notion 뷰'}
             </button>
           ))}
-          {/* Secret feedback — IT Helpdesk disguise */}
           <button onClick={() => setShowFeedback(true)}
             title="IT Helpdesk에 시스템 오류를 신고합니다"
             style={{ marginLeft:'8px', marginBottom:'2px', padding:'3px 10px', fontSize:'11px', cursor:'pointer', background:'#fff8f0', border:'1px solid #d4956b', borderRadius:'3px', color:'#7c3a0a', fontFamily:'Arial,sans-serif' }}>
             ⚠️ 사내 IT Helpdesk 티켓 발행
+          </button>
+          <button onClick={() => setShowCompanySettings(true)}
+            title="위장 정보 설정 (회사명·부서명)"
+            style={{ marginLeft:'4px', marginBottom:'2px', padding:'3px 8px', fontSize:'11px', cursor:'pointer', background:'#fff', border:'1px solid #bbb', borderRadius:'3px', color:'#666', fontFamily:'Arial,sans-serif' }}>
+            ⚙️
           </button>
           <button onClick={() => setThemeMode('daily')} title="일상 모드로 전환"
             style={{ marginLeft:'auto', marginBottom:'2px', padding:'3px 10px', fontSize:'11px', cursor:'pointer', background:'#fff', border:'1px solid #bbb', borderRadius:'3px', color:'#555', fontFamily:'Arial,sans-serif' }}>
@@ -869,6 +1145,13 @@ export default function Tick() {
           {officeTab === 'excel' ? <ExcelView {...viewProps} /> : <NotionView {...viewProps} />}
         </div>
         {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} isOffice={true} />}
+        {showCompanySettings && (
+          <CompanySettingsModal
+            companyName={companyName} deptName={deptName}
+            onSave={handleSaveCompanySettings}
+            onClose={() => setShowCompanySettings(false)}
+          />
+        )}
       </div>
     )
   }
@@ -877,16 +1160,44 @@ export default function Tick() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: C.bg }}>
+      {/* Grand confetti canvas — fixed overlay, pointer-events none */}
+      <canvas ref={canvasRef} style={{ position:'fixed', inset:0, zIndex:55, pointerEvents:'none' }} />
+
+      {/* Click particles */}
       {particles.map(p => (
         <div key={p.id} className="particle" style={{ left:p.x, top:p.y, width:p.size, height:p.size, backgroundColor:p.color, '--ptx':`${p.tx}px`, '--pty':`${p.ty}px`, '--prot':`${p.rot}deg` } as React.CSSProperties} />
       ))}
 
-      {showCelebration && (
-        <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center animate-fade-in"
-             style={{ backgroundColor:'rgba(250,250,249,0.88)', backdropFilter:'blur(8px)' }}>
-          <div className="text-center px-8 animate-celebration-float">
-            <p className="text-[28px] font-bold leading-snug" style={{ color:C.accent }}>전부 완료했어요.</p>
-            <p className="mt-2 text-[15px]" style={{ color:C.stoneMuted }}>오늘 정말 잘했어요.</p>
+      {/* Hidden file input for import */}
+      <input ref={importInputRef} type="file" accept=".json" style={{ display:'none' }}
+        onChange={e => { const f = e.target.files?.[0]; if (f) handleImportFile(f); e.target.value = '' }} />
+
+      {/* MISSION CLEAR Modal */}
+      {showMissionClear && (
+        <div
+          className="fixed inset-0 flex items-center justify-center animate-fade-in"
+          style={{ zIndex:60, backgroundColor:'rgba(250,250,249,0.87)', backdropFilter:'blur(12px)' }}
+          onClick={() => setShowMissionClear(false)}>
+          <div
+            className="text-center mx-4 animate-fade-in-up"
+            style={{ backgroundColor:C.card, borderRadius:'24px', padding:'40px 44px', maxWidth:'360px', width:'100%', boxShadow:'0 24px 80px rgba(0,0,0,0.18)', border:`1px solid ${C.border}` }}
+            onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize:'52px', marginBottom:'16px' }}>🎉</div>
+            <h2 style={{ fontSize:'22px', fontWeight:900, color:C.stone, margin:'0 0 8px', fontFamily:'Outfit,system-ui', letterSpacing:'-0.02em' }}>
+              MISSION CLEAR
+            </h2>
+            <p style={{ fontSize:'16px', fontWeight:700, color:C.accent, margin:'0 0 6px' }}>
+              모든 작업을 정복하셨습니다!
+            </p>
+            <p className="leading-relaxed" style={{ fontSize:'13px', color:C.stoneMuted, margin:'0 0 24px' }}>
+              이제 완전히 뇌를 쉬어주세요.<br />
+              오늘 정말 잘했어요. 🙌
+            </p>
+            <button
+              onClick={() => setShowMissionClear(false)}
+              style={{ padding:'12px 36px', backgroundColor:C.accent, color:'#fff', border:'none', borderRadius:'12px', fontSize:'15px', fontWeight:600, cursor:'pointer', boxShadow:C.shadowAccent, fontFamily:'Outfit,system-ui' }}>
+              닫기
+            </button>
           </div>
         </div>
       )}
@@ -920,7 +1231,6 @@ export default function Tick() {
                 aria-label={muted?'소리 켜기':'소리 끄기'}>
                 {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
               </button>
-              {/* Volume slider */}
               <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg border" style={{ borderColor:C.border, backgroundColor:C.card }}>
                 <span style={{ fontSize:'10px', color:C.stoneSub }}>🔉</span>
                 <input type="range" min={0} max={1} step={0.05} value={volume}
@@ -937,9 +1247,14 @@ export default function Tick() {
               </button>
             </div>
           </div>
-          {/* Microcopy banner */}
+
+          {/* Microcopy banner — word-break: keep-all for Korean mobile typography */}
           <div className="mt-4 px-4 py-3 rounded-xl" style={{ backgroundColor:C.accentLight }}>
-            <p className="text-[13px] font-medium text-center" style={{ color:C.accent }}>{MICROCOPIES[microcopyIdx]}</p>
+            <p
+              className="text-[12px] md:text-[13px] font-medium text-center leading-relaxed"
+              style={{ color:C.accent, wordBreak:'keep-all', overflowWrap:'break-word' }}>
+              {MICROCOPIES[microcopyIdx]}
+            </p>
           </div>
         </header>
 
@@ -1010,7 +1325,28 @@ export default function Tick() {
         {/* Results */}
         {appState==='result' && phases.length > 0 && (
           <div className="animate-fade-in-up">
-            <div className="flex justify-end mb-3">
+            {/* Toolbar row: backup buttons + copy */}
+            <div className="flex justify-between items-center mb-3 gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <button onClick={handleExport}
+                  title="현재 작업을 JSON 파일로 백업"
+                  className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg border cursor-pointer transition-all duration-150"
+                  style={{ borderColor:C.border, backgroundColor:C.card, color:C.stoneMuted }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor=C.accent; e.currentTarget.style.color=C.accent }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.stoneMuted }}>
+                  <Download size={11} />
+                  <span>파일로 백업</span>
+                </button>
+                <button onClick={() => importInputRef.current?.click()}
+                  title="이전 백업 파일(.json) 불러오기"
+                  className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 rounded-lg border cursor-pointer transition-all duration-150"
+                  style={{ borderColor:C.border, backgroundColor:C.card, color:C.stoneMuted }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor=C.accent; e.currentTarget.style.color=C.accent }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.color=C.stoneMuted }}>
+                  <Upload size={11} />
+                  <span>백업 불러오기</span>
+                </button>
+              </div>
               <button onClick={handleCopyMarkdown} title="📋 마크다운 복사"
                 className="flex items-center gap-1.5 text-[12px] px-3 py-1.5 rounded-lg border cursor-pointer transition-all duration-150"
                 style={{ borderColor:C.border, backgroundColor:C.card, color:copied?C.accent:C.stoneMuted }}>
@@ -1141,6 +1477,18 @@ export default function Tick() {
           </div>
         )}
 
+        {/* Backup restore in default state */}
+        {appState==='default' && (
+          <div className="mt-4 flex justify-center">
+            <button onClick={() => importInputRef.current?.click()}
+              title="이전 백업 파일(.json) 불러오기"
+              className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border cursor-pointer"
+              style={{ borderColor:C.border, backgroundColor:C.card, color:C.stoneSub }}>
+              <Upload size={11} /> 백업 불러오기
+            </button>
+          </div>
+        )}
+
         {/* Donation footer */}
         <footer className="mt-16 animate-fade-in">
           <div className="rounded-2xl p-5 text-center" style={{ backgroundColor:C.card, border:`1px solid ${C.border}`, boxShadow:C.shadow }}>
@@ -1155,8 +1503,7 @@ export default function Tick() {
             </a>
             <p className="mt-3 text-[10px]" style={{ color:C.stoneSub }}>Tick. · 2026 · Esc×2 = 긴급 대피</p>
           </div>
-          {/* Anonymous feedback button */}
-          <div className="mt-3 text-center">
+          <div className="mt-3 flex justify-center items-center gap-4">
             <button onClick={() => setShowFeedback(true)}
               className="text-[11px] cursor-pointer"
               style={{ color:C.stoneSub, background:'transparent', border:'none' }}
@@ -1165,6 +1512,15 @@ export default function Tick() {
               title="익명으로 의견을 보내주세요">
               💬 익명 건의함
             </button>
+            <button
+              onClick={() => { setThemeMode('office'); setTimeout(() => setShowCompanySettings(true), 80) }}
+              className="text-[11px] cursor-pointer flex items-center gap-1"
+              style={{ color:C.stoneSub, background:'transparent', border:'none' }}
+              title="회사 위장 정보 설정"
+              onMouseEnter={e => { e.currentTarget.style.color=C.stoneMuted }}
+              onMouseLeave={e => { e.currentTarget.style.color=C.stoneSub }}>
+              <Settings size={11} /> 위장 설정
+            </button>
           </div>
         </footer>
 
@@ -1172,43 +1528,3 @@ export default function Tick() {
     </div>
   )
 }
-
-/*
-═══════════════════════════════════════════════════════════════════════════════
- [API 연결] handleCrush / handlePreset 내부 setTimeout 전체를 아래로 교체:
-
-  setAppState('loading'); setPhases([]); setShowCelebration(false)
-  try {
-    const res  = await fetch('/api/crush', { method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ task: mainTask, level: granularity }) })
-    const data = await res.json()
-    const now  = Date.now()
-    setPhases(data.phases.map((ph: {number:string;title:string;tasks:string[]}, i: number) => ({
-      id: now+i, number: ph.number, title: ph.title,
-      subTasks: ph.tasks.map((text: string, j: number) => ({ id: now+i*100+j, text, completed: false })),
-    })))
-    setAppState('result')
-  } catch { setAppState('default') }
-
-───────────────────────────────────────────────────────────────────────────────
- app/api/crush/route.ts:
-
-  import Anthropic from '@anthropic-ai/sdk'
-  const client = new Anthropic()
-
-  export async function POST(req: Request) {
-    const { task, level } = await req.json()
-    const phaseCount = level === 1 ? 2 : level === 2 ? 3 : 4
-    const taskCount  = level === 1 ? 3 : level === 2 ? 4 : 5
-    const msg = await client.messages.create({
-      model: 'claude-sonnet-4-6', max_tokens: 1024,
-      system: `사용자의 할 일을 Phase ${phaseCount}개 × Sub-task ${taskCount}개로 분해.
-각 Sub-task는 5분 안에 시작 가능한 구체적 행동. 압박 표현 금지.
-순수 JSON만 반환: {"phases":[{"number":"01","title":"...","tasks":["..."]}]}`,
-      messages: [{ role: 'user', content: task }],
-    })
-    return Response.json(JSON.parse((msg.content[0] as { text: string }).text))
-  }
-═══════════════════════════════════════════════════════════════════════════════
-*/
