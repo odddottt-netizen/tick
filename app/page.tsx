@@ -1213,7 +1213,7 @@ export default function Tick() {
               <h1 style={{ fontFamily:'Outfit,system-ui', fontSize:'34px', fontWeight:900, letterSpacing:'-0.03em', color:C.stone, lineHeight:1 }}>
                 Tick<span style={{ color:C.accent }}>.</span>
               </h1>
-              <p className="mt-1.5 text-[13px]" style={{ color:C.stoneMuted }}>큰 일을 작은 조각으로.</p>
+              <p className="mt-1.5 text-[13px]" style={{ color:C.stoneMuted, wordBreak:'keep-all' }}>큰 일을 작은 조각으로.</p>
             </div>
             {/* Controls */}
             <div className="flex items-center gap-1.5 flex-wrap justify-end" style={{ marginTop:'2px' }}>
