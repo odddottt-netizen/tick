@@ -2,8 +2,40 @@ import Anthropic from '@anthropic-ai/sdk'
 
 const client = new Anthropic()
 
+const WINDOW_MS = 60_000
+const MAX_REQ   = 5
+const ipMap     = new Map<string, { count: number; reset: number }>()
+
 export async function POST(req: Request) {
-  const { task, level } = await req.json()
+  // IP Rate Limit — 분당 5회
+  const ip    = (req.headers.get('x-forwarded-for') ?? 'unknown').split(',')[0].trim()
+  const now   = Date.now()
+  const entry = ipMap.get(ip)
+  if (!entry || now > entry.reset) {
+    ipMap.set(ip, { count: 1, reset: now + WINDOW_MS })
+  } else if (entry.count >= MAX_REQ) {
+    return Response.json({ error: 'Too many requests' }, { status: 429 })
+  } else {
+    entry.count++
+  }
+
+  // 입력 검증
+  let body: unknown
+  try { body = await req.json() } catch {
+    return Response.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+  const { task, level } = body as { task: unknown; level: unknown }
+
+  if (typeof task !== 'string' || task.trim().length === 0) {
+    return Response.json({ error: 'Invalid task' }, { status: 400 })
+  }
+  if (task.length > 500) {
+    return Response.json({ error: 'Task too long' }, { status: 400 })
+  }
+  if (typeof level !== 'number' || ![1, 2, 3].includes(level)) {
+    return Response.json({ error: 'Invalid level' }, { status: 400 })
+  }
+
   const phaseCount = level === 1 ? 2 : level === 2 ? 3 : 4
   const taskCount  = level === 1 ? 3 : level === 2 ? 4 : 5
 
@@ -43,8 +75,11 @@ export async function POST(req: Request) {
     messages: [{ role: 'user', content: task }],
   })
 
-  const raw = (msg.content[0] as { text: string }).text
-  // 마크다운 코드블록 제거 후 파싱
+  const raw  = (msg.content[0] as { text: string }).text
   const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
-  return Response.json(JSON.parse(text))
+  try {
+    return Response.json(JSON.parse(text))
+  } catch {
+    return Response.json({ error: 'Parse failed' }, { status: 502 })
+  }
 }
