@@ -324,9 +324,11 @@ input[type="range"]:focus::-webkit-slider-thumb {
 
 .tabslayer-progress-fill {
   height: 100%;
+  width: 100%;
   background: linear-gradient(90deg, #e2efeb 0%, #8FA89A 60%, #6B8778 100%);
   border-radius: 999px;
-  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Report */
@@ -556,4 +558,230 @@ input[type="range"]:focus::-webkit-slider-thumb {
   color: #9e9a95;
   letter-spacing: 0.01em;
   text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* ─── Praise Chat ─ Slack Style Specific Styles ─────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.praise-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.praise-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.praise-scroll::-webkit-scrollbar-thumb {
+  background: #bcaaa4;
+  border-radius: 4px;
+}
+.praise-scroll::-webkit-scrollbar-thumb:hover {
+  background: #a1887f;
+}
+
+.praise-sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.praise-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.praise-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+}
+
+@keyframes message-pop {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.praise-message-enter {
+  animation: message-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-4px); }
+}
+
+.praise-typing-dot {
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+.praise-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.praise-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes reaction-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.praise-reaction-enter {
+  animation: reaction-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes count-up-shine {
+  0%   { color: #f9a825; text-shadow: 0 0 0px rgba(249,168,37,0); }
+  50%  { color: #ffca28; text-shadow: 0 0 8px rgba(249,168,37,0.4); }
+  100% { color: #f9a825; text-shadow: 0 0 0px rgba(249,168,37,0); }
+}
+
+.praise-count-up {
+  animation: count-up-shine 0.6s ease-out;
+}
+
+.praise-input-area {
+  border: 1px solid rgba(29, 28, 29, 0.13);
+  border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.praise-input-area:focus-within {
+  border-color: rgba(29, 28, 29, 0.3);
+  box-shadow: 0 0 0 1px rgba(29, 28, 29, 0.05), 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.praise-escape-terminal {
+  font-family: 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
+}
+
+.praise-aws-console {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* ─── Meet Escape ─ Google Meet Style Specific Styles ───────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+.meet-escape-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background: #202124;
+  color: #e8eaed;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Google Sans', Roboto, Arial, sans-serif;
+}
+
+.meet-video-tile {
+  transition: box-shadow 0.2s ease-out;
+}
+.meet-video-tile:hover {
+  box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.4);
+}
+
+.meet-control-btn {
+  transition: background 0.15s ease-out, transform 0.1s ease-out;
+}
+.meet-control-btn:hover {
+  transform: scale(1.08);
+}
+
+.meet-end-call {
+  background: #ea4335;
+  transition: background 0.15s ease-out, transform 0.1s ease-out;
+}
+.meet-end-call:hover {
+  background: #c5221f;
+  transform: scale(1.08);
+}
+
+.meet-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.meet-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.meet-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+@keyframes meet-slide-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.meet-slide-enter {
+  animation: meet-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes meet-bar-grow {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+.meet-bar-grow {
+  transform-origin: bottom center;
+  animation: meet-bar-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes meet-line-draw {
+  from { stroke-dashoffset: 1000; }
+  to   { stroke-dashoffset: 0; }
+}
+.meet-line-draw {
+  stroke-dasharray: 1000;
+  animation: meet-line-draw 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes meet-breathe {
+  0%, 100% { opacity: 0.9; }
+  50%       { opacity: 1; }
+}
+.meet-breathe {
+  animation: meet-breathe 3s ease-in-out infinite;
+}
+
+.meet-typing-cursor::after {
+  content: '|';
+  animation: meet-cursor-blink 1s step-end infinite;
+}
+@keyframes meet-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@keyframes meet-speaking-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.8); }
+}
+.meet-speaking-pulse {
+  animation: meet-speaking-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes meet-boss-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.meet-boss-fade {
+  animation: meet-boss-fade 0.3s ease-out forwards;
+  background: #fff;
+  color: #202124;
+  height: 100vh;
+  width: 100%;
+  overflow: auto;
+}
+.meet-boss-content h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #202124;
+}
+.meet-boss-content h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a73e8;
+  margin-top: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+.meet-boss-content p, .meet-boss-content li {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #3c4043;
+}
+
+@keyframes meet-tip-fade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.meet-tip-fade {
+  animation: meet-tip-fade 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }

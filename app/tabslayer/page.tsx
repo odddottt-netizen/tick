@@ -567,7 +567,7 @@ export default function TabSlayerPage() {
           <div className="tabslayer-progress-track">
             <div
               className="tabslayer-progress-fill"
-              style={{ width: `${progress}%` }}
+              style={{ transform: `scaleX(${progress / 100})` }}
             />
           </div>
           <p className="text-center text-xs text-[#9E9A95] mt-2">
