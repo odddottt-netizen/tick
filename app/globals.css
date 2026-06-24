@@ -110,6 +110,8 @@ body {
   -webkit-font-smoothing: antialiased;
   color: #1E1B18;
   min-height: 100vh;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* ─── Glassmorphism Utilities ───────────────────────────────────────────── */

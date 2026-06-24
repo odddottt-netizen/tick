@@ -945,20 +945,6 @@ export default function Tick() {
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   // [LLM API 연결] — fetch('/api/crush') 호출 + API 실패 시 목 데이터 폴백
-  async function readCrushStream(res: Response): Promise<{ number: string; title: string; tasks: string[] }[]> {
-    const reader = res.body!.getReader()
-    const dec    = new TextDecoder()
-    let   text   = ''
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      text += dec.decode(value, { stream: true })
-    }
-    const clean = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
-    const data  = JSON.parse(clean)
-    return data.phases
-  }
-
   const handleCrush = useCallback(async () => {
     if (!mainTask.trim()) return
     setAppState('loading'); setPhases([]); setShowMissionClear(false); setEditingId(null)
@@ -969,13 +955,15 @@ export default function Tick() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task: mainTask, level: granularity }),
       })
-      if (!res.ok) throw new Error('API error')
-      const phases = await readCrushStream(res)
-      const now    = Date.now()
-      setPhases(phases.map((ph, i) => ({
-        id: now + i, number: ph.number, title: ph.title,
-        subTasks: ph.tasks.map((text, j) => ({ id: now + i * 100 + j, text, completed: false })),
-      })))
+      if (!res.ok) throw new Error(`API error ${res.status}`)
+      const data = await res.json()
+      const now  = Date.now()
+      setPhases(data.phases.map(
+        (ph: { number: string; title: string; tasks: string[] }, i: number) => ({
+          id: now + i, number: ph.number, title: ph.title,
+          subTasks: ph.tasks.map((text: string, j: number) => ({ id: now + i * 100 + j, text, completed: false })),
+        })
+      ))
       setIsFallback(false)
       setAppState('result')
     } catch {
@@ -995,13 +983,15 @@ export default function Tick() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task: value, level: granularity }),
       })
-      if (!res.ok) throw new Error('API error')
-      const phases = await readCrushStream(res)
-      const now    = Date.now()
-      setPhases(phases.map((ph, i) => ({
-        id: now + i, number: ph.number, title: ph.title,
-        subTasks: ph.tasks.map((text, j) => ({ id: now + i * 100 + j, text, completed: false })),
-      })))
+      if (!res.ok) throw new Error(`API error ${res.status}`)
+      const data = await res.json()
+      const now  = Date.now()
+      setPhases(data.phases.map(
+        (ph: { number: string; title: string; tasks: string[] }, i: number) => ({
+          id: now + i, number: ph.number, title: ph.title,
+          subTasks: ph.tasks.map((text: string, j: number) => ({ id: now + i * 100 + j, text, completed: false })),
+        })
+      ))
       setIsFallback(false)
       setAppState('result')
     } catch {
@@ -1331,6 +1321,15 @@ export default function Tick() {
               <div className="absolute inset-0 border-[3px] border-t-transparent rounded-full animate-spin-slow" style={{ borderColor:C.accent, borderTopColor:'transparent' }} />
             </div>
             <p className="text-[14px] animate-pulse-soft" style={{ color:C.stoneMuted }}>잘게 쪼개는 중이에요...</p>
+          </div>
+        )}
+
+        {/* Fallback notice */}
+        {appState==='result' && isFallback && (
+          <div className="mb-3 px-4 py-3 rounded-2xl text-[12px] flex items-center gap-2 animate-fade-in"
+            style={{ backgroundColor:'rgba(234,88,12,0.08)', color:'#C2410C', border:'1px solid rgba(234,88,12,0.18)' }}>
+            <span>⚠️</span>
+            <span>AI 연결 실패 — 기본 템플릿을 보여드립니다. 잠시 후 다시 분쇄해보세요.</span>
           </div>
         )}
 
