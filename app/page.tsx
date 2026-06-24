@@ -50,6 +50,24 @@ const APPS: AppItem[] = [
     href: '/tabslayer',
     color: '#6B8778',
   },
+  {
+    id: 'meet',
+    emoji: '📹',
+    name: 'Meet Escape',
+    description: '지루한 화상회의 중 딴짓하는 척 할 수 있는 Google Meet 클론. ESC 길게 누르면 보스 모드.',
+    tags: ['회의', '생존'],
+    href: '/meet',
+    color: '#1a73e8',
+  },
+  {
+    id: 'praise',
+    emoji: '🎉',
+    name: 'Praise Me',
+    description: 'Slack 칭찬 채널 시뮬레이터. 메시지를 보내면 동료들이 쏟아지는 칭찬으로 응답해줍니다.',
+    tags: ['칭찬', '힐링'],
+    href: '/praise',
+    color: '#007a5a',
+  },
 ]
 
 function FloatingBlob({ className, style }: { className?: string; style?: React.CSSProperties }) {
