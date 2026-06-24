@@ -68,6 +68,15 @@ const APPS: AppItem[] = [
     href: '/praise',
     color: '#007a5a',
   },
+  {
+    id: 'pettin',
+    emoji: '🐕',
+    name: "Pettin'",
+    description: '은별이를 조심스럽게 쓰다듬어 보세요. 너무 빠르거나 멈추면 도망갑니다.',
+    tags: ['힐링', '게임'],
+    href: '/pettin',
+    color: '#f43f5e',
+  },
 ]
 
 function FloatingBlob({ className, style }: { className?: string; style?: React.CSSProperties }) {
