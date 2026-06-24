@@ -433,7 +433,7 @@ export default function Page() {
       </div>
 
       {/* 메인 이미지 영역 */}
-      <div className="relative w-full max-w-sm aspect-square mb-8">
+      <div className="relative w-full max-w-sm aspect-square mb-4">
         {/* 이미지 래퍼 */}
         <div
           ref={imgWrapRef}
@@ -442,16 +442,9 @@ export default function Page() {
           <img
             src={currentImg}
             alt="은별이"
-            className={`w-full h-full object-cover transition-opacity duration-500 ${
-              isGameOver ? "opacity-90" : "opacity-100"
-            }`}
+            className="w-full h-full object-cover"
             draggable={false}
           />
-
-          {/* 게임오버 / 클리어 오버레이 */}
-          {isGameOver && (
-            <div className="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" />
-          )}
 
           {/* neglect 블루 안개 */}
           <div
@@ -468,7 +461,7 @@ export default function Page() {
 
           {/* 말풍선 */}
           {showBubble && (
-            <div className="absolute top-[15%] left-1/2 -translate-x-1/2 animate-[fadeIn_0.5s_ease]">
+            <div className="absolute top-[4%] left-1/2 -translate-x-1/2 animate-[fadeIn_0.5s_ease]">
               <div className="relative bg-white/90 px-5 py-3 rounded-2xl rounded-bl-none shadow-lg border border-stone-100">
                 <p className="text-stone-700 text-sm font-medium tracking-wide">
                   {bubbleText}
@@ -478,24 +471,6 @@ export default function Page() {
             </div>
           )}
 
-          {/* 게임오버 텍스트 */}
-          {isGameOver && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-stone-800 text-lg font-semibold mb-1">
-                  {gameState === "gameover-fast"
-                    ? "은별이가 깜짝 놀라 도망쳤어요!"
-                    : "오래 멈춘 손길에 외로워합니다"}
-                </p>
-                <button
-                  onClick={restart}
-                  className="mt-3 px-5 py-2 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-700 transition"
-                >
-                  다시 시작
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* 클리어 텍스트 */}
           {isClear && (
@@ -536,6 +511,23 @@ export default function Page() {
           ))}
         </div>
       </div>
+
+      {/* 게임오버 텍스트 (이미지 아래) */}
+      {isGameOver && (
+        <div className="text-center mb-6 animate-[fadeIn_0.4s_ease]">
+          <p className="text-stone-800 text-base font-semibold mb-3">
+            {gameState === "gameover-fast"
+              ? "은별이가 깜짝 놀라 도망쳤어요!"
+              : "오래 멈춘 손길에 외로워합니다"}
+          </p>
+          <button
+            onClick={restart}
+            className="px-5 py-2 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-700 transition"
+          >
+            다시 시작
+          </button>
+        </div>
+      )}
 
       {/* 하단 가이드 */}
       <div className="text-center text-xs text-stone-400 space-y-1">
