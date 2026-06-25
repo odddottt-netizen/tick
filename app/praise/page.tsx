@@ -541,7 +541,7 @@ export default function PraisePage() {
               <Circle className="h-3 w-3 fill-[#2bac76] text-[#2bac76]" />
               <span>6명</span>
             </div>
-            <div className="flex items-center gap-2 text-[#616061]">
+            <div className="hidden md:flex items-center gap-2 text-[#616061]">
               <Bell className="h-4 w-4 cursor-pointer hover:text-[#1d1c1d]" />
               <Settings className="h-4 w-4 cursor-pointer hover:text-[#1d1c1d]" />
               <Search className="h-4 w-4 cursor-pointer hover:text-[#1d1c1d]" />
@@ -626,7 +626,7 @@ export default function PraisePage() {
         <div className="px-5 pb-5">
           <div className="praise-input-area bg-white">
             {/* Format toolbar */}
-            <div className="flex items-center gap-1 border-b border-[#e2e2e2] px-3 py-1.5">
+            <div className="hidden md:flex items-center gap-1 border-b border-[#e2e2e2] px-3 py-1.5">
               <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <Bold className="h-4 w-4" />
               </button>
