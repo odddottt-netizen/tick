@@ -742,6 +742,43 @@ function FeedbackModal({ onClose, isOffice }: { onClose: () => void; isOffice: b
   )
 }
 
+// ─── Mobile Mail Camouflage ───────────────────────────────────────────────────
+
+function MobileMailCamouflage({ onBack }: { onBack: () => void }) {
+  const mails = [
+    { from: '김대표', subject: '이번 주 전략 미팅 일정 확인 요청', preview: '안녕하세요. 이번 주 목요일 오후 2시...', time: '10:32', unread: true },
+    { from: 'HR팀', subject: '[공지] 6월 급여 명세서 발행 안내', preview: '6월 급여 명세서가 발행되었습니다...', time: '어제', unread: true },
+    { from: '박부장', subject: 'Re: Q2 실적 보고서 검토 의견', preview: '네, 확인했습니다. 3페이지 수치 관련해서...', time: '월', unread: false },
+    { from: '이팀장', subject: '신규 프로젝트 킥오프 미팅 자료', preview: '첨부 자료 확인 부탁드립니다...', time: '월', unread: false },
+    { from: 'CloudSystem', subject: 'Monthly Report Available', preview: 'Your monthly analytics report is ready...', time: '토', unread: false },
+  ]
+  return (
+    <div className="min-h-[100dvh] flex flex-col" style={{ background: '#f2f2f7', fontFamily: '-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif' }} onDoubleClick={onBack}>
+      <div style={{ background: '#fff', padding: '16px 16px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <span style={{ fontSize: '28px', fontWeight: 700, color: '#000' }}>받은편지함</span>
+        </div>
+      </div>
+      <div style={{ flex: 1, background: '#fff' }}>
+        {mails.map((m, i) => (
+          <div key={i} style={{ padding: '12px 16px', borderBottom: '0.5px solid #c6c6c8', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.unread ? '#007AFF' : 'transparent', marginTop: '6px', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                <span style={{ fontSize: '15px', fontWeight: m.unread ? 600 : 400, color: '#000' }}>{m.from}</span>
+                <span style={{ fontSize: '12px', color: '#8e8e93' }}>{m.time}</span>
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: m.unread ? 600 : 400, color: '#000', marginBottom: '2px' }}>{m.subject}</div>
+              <div style={{ fontSize: '13px', color: '#8e8e93', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.preview}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ padding: '8px', textAlign: 'center', fontSize: '11px', color: '#8e8e93' }}>더블탭으로 돌아가기</div>
+    </div>
+  )
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Tick() {
@@ -766,6 +803,7 @@ export default function Tick() {
   const [deptName,            setDeptName]            = useState('')
   const [showCompanySettings, setShowCompanySettings] = useState(false)
   const [isFallback,          setIsFallback]          = useState(false)
+  const [isDesktop,           setIsDesktop]           = useState(false)
 
   const editInputRef    = useRef<HTMLInputElement>(null)
   const particleIdRef   = useRef(0)
@@ -780,6 +818,13 @@ export default function Tick() {
 
   useEffect(() => { mutedRef.current = muted }, [muted])
   useEffect(() => { volumeRef.current = volume }, [volume])
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     setMicrocopyIdx(Math.floor(Math.random() * MICROCOPIES.length))
@@ -918,6 +963,7 @@ export default function Tick() {
       setShowMissionClear(true)
       playTaDa(mutedRef.current, volumeRef.current)
       launchGrandConfetti()
+      if (navigator.vibrate) navigator.vibrate([50, 30, 50, 30, 100])
     }
     if (progress < 100) {
       celebratedRef.current = false
@@ -1095,8 +1141,9 @@ export default function Tick() {
   // ── Boss Mode ─────────────────────────────────────────────────────────────
 
   if (bossMode) {
+    if (!isDesktop) return <MobileMailCamouflage onBack={() => { setBossMode(false); setMuted(false) }} />
     return (
-      <div className="min-h-screen bg-white" style={{ cursor:'default', userSelect:'none' }}
+      <div className="min-h-[100dvh] bg-white" style={{ cursor:'default', userSelect:'none', touchAction:'manipulation', wordBreak:'keep-all', overflowWrap:'break-word' }}
            onDoubleClick={() => { setBossMode(false); setMuted(false) }}>
         <div style={{ maxWidth:'700px', margin:'0 auto', padding:'64px 40px', fontFamily:'Georgia,serif' }}>
           <div style={{ width:'32px', height:'32px', borderRadius:'6px', background:'#f1f3f5', marginBottom:'24px' }} />
@@ -1116,7 +1163,7 @@ export default function Tick() {
 
   if (themeMode === 'office') {
     return (
-      <div style={{ display:'flex', flexDirection:'column', height:'100vh' }}>
+      <div style={{ display:'flex', flexDirection:'column', height:'100dvh', touchAction:'manipulation', wordBreak:'keep-all', overflowWrap:'break-word' }}>
         {particles.map(p => (
           <div key={p.id} className="particle" style={{ left:p.x, top:p.y, width:p.size, height:p.size, backgroundColor:p.color, '--ptx':`${p.tx}px`, '--pty':`${p.ty}px`, '--prot':`${p.rot}deg` } as React.CSSProperties} />
         ))}
@@ -1164,7 +1211,7 @@ export default function Tick() {
   // ── Daily Mode ─────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #F0EBE5 0%, #E8E2D9 50%, #E0D8D0 100%)' }}>
+    <div className="min-h-[100dvh]" style={{ background: 'linear-gradient(135deg, #F0EBE5 0%, #E8E2D9 50%, #E0D8D0 100%)', touchAction:'manipulation', wordBreak:'keep-all', overflowWrap:'break-word' }}>
       {/* Grand confetti canvas — fixed overlay, pointer-events none */}
       <canvas ref={canvasRef} style={{ position:'fixed', inset:0, zIndex:55, pointerEvents:'none' }} />
 

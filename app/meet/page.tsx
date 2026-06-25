@@ -336,6 +336,46 @@ const PRIVACY_CONTENT = `
 
 
 /* ─────────────────────────────────────────────────────────────────────────── */
+/*  Mobile Mail Camouflage                                                    */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+function MobileMailCamouflage({ onBack }: { onBack: () => void }) {
+  const mails = [
+    { from: '김대표', subject: '이번 주 전략 미팅 일정 확인 요청', preview: '안녕하세요, 이번 주 목요일 오후 2시 미팅 일정 괜찮으신가요?', time: '10:32', unread: true },
+    { from: '박팀장', subject: '[공유] 2분기 판매 실적 보고서', preview: '첨부된 파일 확인 부탁드립니다. 주요 수치 요약은 본문 참조해주세요.', time: '09:15', unread: true },
+    { from: '네이버 스마트스토어', subject: '광고 효율 주간 리포트 도착', preview: '지난 7일 클릭률 3.2%, 전환율 1.8%로 집계되었습니다.', time: '어제', unread: false },
+    { from: '카페24', subject: '6월 정기 점검 안내 (06/28 02:00~04:00)', preview: '서비스 안정화를 위한 정기 점검이 예정되어 있습니다.', time: '어제', unread: false },
+    { from: '이디자이너', subject: 'FW 시즌 룩북 시안 2차 전달드립니다', preview: '수정 사항 반영했습니다. 검토 후 의견 주시면 바로 수정하겠습니다.', time: '월요일', unread: false },
+  ];
+  return (
+    <div className="fixed inset-0 z-[100] flex flex-col min-h-[100dvh]" style={{ background: '#f2f2f7', fontFamily: "'Noto Sans KR', system-ui, sans-serif" }} onDoubleClick={onBack}>
+      <div style={{ background: '#f2f2f7', padding: '52px 16px 8px', borderBottom: '1px solid #d1d1d6' }}>
+        <div style={{ fontSize: '28px', fontWeight: 700, color: '#1c1c1e', marginBottom: '4px' }}>받은편지함</div>
+        <div style={{ fontSize: '13px', color: '#8e8e93' }}>{mails.filter(m => m.unread).length}개 읽지 않음</div>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        {mails.map((m, i) => (
+          <div key={i} style={{ background: '#ffffff', borderBottom: '1px solid #e5e5ea', padding: '14px 16px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.unread ? '#007aff' : 'transparent', marginTop: '6px', flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                <span style={{ fontSize: '15px', fontWeight: m.unread ? 600 : 400, color: '#1c1c1e' }}>{m.from}</span>
+                <span style={{ fontSize: '13px', color: '#8e8e93', flexShrink: 0 }}>{m.time}</span>
+              </div>
+              <div style={{ fontSize: '15px', fontWeight: m.unread ? 600 : 400, color: '#1c1c1e', marginBottom: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.subject}</div>
+              <div style={{ fontSize: '13px', color: '#8e8e93', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.preview}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ padding: '12px 16px', background: '#f2f2f7', borderTop: '1px solid #d1d1d6', textAlign: 'center' }}>
+        <span style={{ fontSize: '11px', color: '#c7c7cc' }}>더블탭하여 돌아가기</span>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
 /*  Main Component                                                            */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
@@ -350,6 +390,7 @@ export default function MeetEscapePage() {
   const [transcription, setTranscription] = useState('')
   const [currentTip, setCurrentTip] = useState(0)
   const [bossMode, setBossMode] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null)
   const [camError, setCamError] = useState(false)
   const [escPressed, setEscPressed] = useState(false)
@@ -544,6 +585,14 @@ export default function MeetEscapePage() {
     }
   }, [bossMode])
 
+  /* ── isDesktop detection ─────────────────────────────────────────────────── */
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   /* ── Chat Auto-scroll ────────────────────────────────────────────────────── */
   const chatEndRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -568,6 +617,7 @@ export default function MeetEscapePage() {
 
   /* ── Render ──────────────────────────────────────────────────────────────── */
   if (bossMode) {
+    if (!isDesktop) return <MobileMailCamouflage onBack={() => setBossMode(false)} />
     return (
       <div className="meet-escape-page meet-boss-fade">
         <div className="meet-boss-content w-full h-full overflow-auto p-8 max-w-3xl mx-auto">
@@ -677,7 +727,7 @@ export default function MeetEscapePage() {
 
         {/* Right Panel */}
         {rightPanel !== 'none' && (
-          <div className="w-80 bg-[#2d2e31] rounded-xl flex flex-col overflow-hidden border border-[#5f6368]/30">
+          <div className="w-80 bg-[#2d2e31] rounded-xl hidden md:flex flex-col overflow-hidden border border-[#5f6368]/30">
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#5f6368]/30">
               <div className="flex gap-4">
                 <button

@@ -98,7 +98,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'linear-gradient(135deg, #F0EBE5 0%, #E8E2D9 50%, #E0D8D0 100%)' }}>
+    <div className="min-h-[100dvh] relative overflow-x-hidden break-keep break-words" style={{ background: 'linear-gradient(135deg, #F0EBE5 0%, #E8E2D9 50%, #E0D8D0 100%)', touchAction: 'pan-y' }}>
       {/* Floating background blobs */}
       <FloatingBlob
         className="w-[400px] h-[400px] -top-20 -left-40"
@@ -123,12 +123,12 @@ export default function LandingPage() {
         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
       />
 
-      <div className="max-w-[960px] mx-auto px-6 py-12 md:py-20 relative z-10">
+      <div className="max-w-[960px] mx-auto px-4 py-10 md:px-6 md:py-20 relative z-10">
 
         {/* Header */}
-        <header className="text-center mb-20 md:mb-28 animate-fade-in">
+        <header className="text-center mb-16 md:mb-28 animate-fade-in">
           <div
-            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full mb-8 md:mb-10 animate-shimmer"
+            className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full mb-8 md:mb-10 animate-shimmer select-none"
             style={{
               background: 'linear-gradient(90deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.72) 50%, rgba(255,255,255,0.55) 100%)',
               backgroundSize: '200% 100%',
@@ -139,7 +139,7 @@ export default function LandingPage() {
             }}
           >
             <Sparkles size={15} style={{ color: '#E85D04' }} className="animate-pulse-soft" />
-            <span className="text-[13px] md:text-[14px] font-semibold" style={{ color: '#6B6560' }}>sunmul.app</span>
+            <span className="text-[14px] font-semibold" style={{ color: '#6B6560' }}>sunmul.app</span>
           </div>
 
           <h1
@@ -178,7 +178,7 @@ export default function LandingPage() {
 
           {/* Scroll indicator */}
           <div className="mt-10 md:mt-14 flex flex-col items-center gap-2 animate-fade-in-up">
-            <span className="text-[11px] font-medium uppercase tracking-widest" style={{ color: '#9E9995' }}>Scroll</span>
+            <span className="text-[14px] font-medium uppercase tracking-widest" style={{ color: '#9E9995' }}>Scroll</span>
             <div className="w-5 h-8 rounded-full border-2 flex items-start justify-center p-1.5" style={{ borderColor: '#C0BDB8' }}>
               <div
                 className="w-1.5 h-1.5 rounded-full"
@@ -189,12 +189,12 @@ export default function LandingPage() {
         </header>
 
         {/* App Grid */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {APPS.map((app, i) => (
             <a
               key={app.id}
               href={app.href}
-              className="group relative rounded-3xl p-6 md:p-8 glass-card animate-scale-in overflow-hidden"
+              className="group relative rounded-3xl p-5 md:p-8 glass-card animate-scale-in overflow-hidden select-none touch-manipulation"
               style={{ animationDelay: `${i * 0.12}s`, animationFillMode: 'both' }}
             >
               {/* Gradient border glow on hover */}
@@ -215,7 +215,7 @@ export default function LandingPage() {
                     {app.emoji}
                   </div>
                   <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                    <span className="text-[13px] md:text-[14px] font-semibold" style={{ color: app.color }}>앱 실행하기</span>
+                    <span className="text-[14px] font-semibold" style={{ color: app.color }}>앱 실행하기</span>
                     <ArrowRight size={18} style={{ color: app.color }} className="transition-transform duration-300 group-hover:translate-x-1" />
                   </div>
                 </div>
@@ -231,7 +231,7 @@ export default function LandingPage() {
                   {app.tags.map(tag => (
                     <span
                       key={tag}
-                      className="text-[11px] font-semibold px-3.5 py-1.5 rounded-full transition-colors duration-200"
+                      className="text-[14px] md:text-[13px] font-semibold px-3.5 py-2 md:py-1.5 rounded-full transition-colors duration-200 inline-flex items-center justify-center min-h-[44px] md:min-h-0 select-none"
                       style={{ backgroundColor: `${app.color}12`, color: app.color }}
                     >
                       {tag}
@@ -244,19 +244,19 @@ export default function LandingPage() {
         </section>
 
         {/* Stats / Social proof section */}
-        <section className="mt-16 md:mt-24 text-center animate-fade-in-up">
-          <div className="rounded-3xl p-8 md:p-10 glass-strong inline-block max-w-[600px] w-full">
-            <div className="grid grid-cols-3 gap-4 md:gap-8">
+        <section className="mt-12 md:mt-24 text-center animate-fade-in-up">
+          <div className="rounded-3xl p-6 md:p-10 glass-strong inline-block max-w-[600px] w-full">
+            <div className="grid grid-cols-3 gap-3 md:gap-8">
               {[
                 { value: '4+', label: '서비스' },
                 { value: '0', label: '로그인 필요' },
                 { value: '∞', label: '무료' },
               ].map((stat, i) => (
                 <div key={i} className="text-center">
-                  <p className="text-[28px] md:text-[36px] font-bold" style={{ fontFamily: 'Outfit,system-ui', color: '#E85D04' }}>
+                  <p className="text-[28px] md:text-[36px] font-bold select-none" style={{ fontFamily: 'Outfit,system-ui', color: '#E85D04' }}>
                     {stat.value}
                   </p>
-                  <p className="text-[12px] md:text-[13px] mt-1" style={{ color: '#6B6560' }}>{stat.label}</p>
+                  <p className="text-[14px] md:text-[13px] mt-1 select-none" style={{ color: '#6B6560' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -264,14 +264,14 @@ export default function LandingPage() {
         </section>
 
         {/* Footer */}
-        <footer className="mt-16 md:mt-24 text-center animate-fade-in">
-          <div className="rounded-3xl p-8 md:p-10 glass-card inline-block max-w-[520px] w-full">
-            <p className="text-[14px] md:text-[15px] leading-[1.8]" style={{ color: '#6B6560', wordBreak: 'keep-all' }}>
+        <footer className="mt-12 md:mt-24 text-center animate-fade-in">
+          <div className="rounded-3xl p-6 md:p-10 glass-card inline-block max-w-[520px] w-full">
+            <p className="text-[14px] md:text-[15px] leading-[1.8] select-none" style={{ color: '#6B6560', wordBreak: 'keep-all' }}>
               sunmul.app은 일상을 더 풍요롭게 만드는<br className="hidden sm:block" />
               도구들을 큐레이션하는 플랫폼입니다.<br />
               새로운 앱이 계속 추가될 예정이에요.
             </p>
-            <p className="mt-5 text-[12px] md:text-[13px]" style={{ color: '#9E9995' }}>
+            <p className="mt-5 text-[14px] md:text-[13px] select-none" style={{ color: '#9E9995' }}>
               sunmul.app · 2026
             </p>
           </div>
@@ -283,11 +283,11 @@ export default function LandingPage() {
       {scrolled && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full glass-strong flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110"
+          className="fixed bottom-8 right-8 md:bottom-6 md:right-6 z-50 w-14 h-14 md:w-11 md:h-11 rounded-full glass-strong flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 select-none touch-manipulation"
           style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
           aria-label="맨 위로"
         >
-          <ChevronDown size={18} style={{ color: '#6B6560', transform: 'rotate(180deg)' }} />
+          <ChevronDown size={20} style={{ color: '#6B6560', transform: 'rotate(180deg)' }} />
         </button>
       )}
     </div>

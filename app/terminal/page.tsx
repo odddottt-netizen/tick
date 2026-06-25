@@ -31,6 +31,47 @@ const LOG_MESSAGES = [
 
 const STORAGE_KEY = 'terminal-focus-sessions';
 
+/* ─── News Reader Camouflage (mobile) ──────────────────────────────────────── */
+function NewsReaderCamouflage({ onClose }: { onClose: () => void }) {
+  const [activeIdx, setActiveIdx] = React.useState(0);
+  const articles = [
+    { title: '2026 패션 트렌드 리포트: 미니멀리즘의 귀환', src: '패션비즈', time: '2시간 전', cat: '패션' },
+    { title: '글로벌 이커머스 성장률 전년비 18% 상승', src: '어패럴뉴스', time: '4시간 전', cat: '비즈니스' },
+    { title: 'D2C 브랜드 성공 방정식: 데이터 기반 고객 경험', src: '패션인사이트', time: '6시간 전', cat: '전략' },
+    { title: 'SNS 마케팅, 숏폼 영상이 전환율 3배 높여', src: '마케팅위크', time: '12시간 전', cat: '마케팅' },
+    { title: '소비자 행동 변화, MZ→알파세대 전환 가속', src: '삼성패션연구소', time: '1일 전', cat: '리서치' },
+  ];
+  const a = articles[activeIdx];
+  return (
+    <div className="fixed inset-0 z-[100] flex flex-col" style={{ background: '#fff', fontFamily: '-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif' }}>
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontSize: '18px', fontWeight: 700 }}>뉴스</span>
+        <button onClick={onClose} style={{ fontSize: '12px', color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer' }}>닫기 (F2)</button>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', borderBottom: '1px solid #e5e7eb' }}>
+        {articles.map((ar, i) => (
+          <div key={i} onClick={() => setActiveIdx(i)} style={{ padding: '12px 16px', borderBottom: '1px solid #f3f4f6', background: i === activeIdx ? '#f0f9ff' : '#fff', cursor: 'pointer' }}>
+            <div style={{ fontSize: '11px', color: '#E85D04', fontWeight: 600, marginBottom: '3px', textTransform: 'uppercase' }}>{ar.cat}</div>
+            <div style={{ fontSize: '14px', fontWeight: 600, color: '#111', marginBottom: '3px', lineHeight: 1.4 }}>{ar.title}</div>
+            <div style={{ fontSize: '11px', color: '#9ca3af' }}>{ar.src} · {ar.time}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ flex: 2, overflowY: 'auto', padding: '20px 20px 40px' }}>
+        <div style={{ fontSize: '11px', color: '#E85D04', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase' }}>{a.cat}</div>
+        <h2 style={{ fontSize: '19px', fontWeight: 700, color: '#111', lineHeight: 1.3, marginBottom: '6px' }}>{a.title}</h2>
+        <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '14px' }}>{a.src} · {a.time}</div>
+        <p style={{ fontSize: '14px', color: '#374151', lineHeight: 1.7, marginBottom: '10px' }}>
+          패션 업계 전문가들은 올해 시장 변화를 면밀히 주시하고 있다. 소비자 구매 패턴의 변화와 디지털 전환 가속화가 맞물리며 브랜드 전략도 빠르게 진화하는 추세다.
+        </p>
+        <p style={{ fontSize: '14px', color: '#374151', lineHeight: 1.7 }}>
+          특히 30–50대 소비층의 온라인 구매 비중이 크게 늘면서, 모바일 퍼스트 전략의 중요성이 더욱 부각되고 있다. 시즌 기획부터 콘텐츠 마케팅까지 일관된 브랜드 경험이 핵심 과제로 떠오르고 있다.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function TerminalPage() {
   // ─── State ─────────────────────────────────────────────────────────────────
   const [timeLeft, setTimeLeft] = useState(FOCUS_TIME);
@@ -42,6 +83,7 @@ export default function TerminalPage() {
   const [input, setInput] = useState('');
   const [terminalColor, setTerminalColor] = useState<'green' | 'orange'>('green');
   const [showHelp, setShowHelp] = useState(true);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   // ─── Refs (for intervals to read latest values without resetting) ──────────
   const timeLeftRef = useRef(timeLeft);
@@ -183,6 +225,7 @@ export default function TerminalPage() {
   useEffect(() => {
     if (timeLeft === 0 && isRunningRef.current) {
       setIsRunning(false);
+      if (navigator.vibrate) navigator.vibrate(modeRef.current === 'focus' ? [80, 40, 80] : 40);
       if (modeRef.current === 'focus') {
         saveSession();
         playThock();
@@ -230,6 +273,13 @@ export default function TerminalPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
   }, []);
 
   // ─── Handlers ────────────────────────────────────────────────────────────────
@@ -282,14 +332,14 @@ export default function TerminalPage() {
 
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-[#222529] font-sans relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-[#faf8f5] text-[#222529] font-sans relative overflow-hidden">
       {/* Soft ambient background blobs */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#e7e5e4] opacity-40 blur-3xl" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-[#e7e5e4] opacity-40 blur-3xl" />
       </div>
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 py-10 flex flex-col gap-6 h-screen">
+      <main className="relative z-10 max-w-5xl mx-auto px-6 py-10 flex flex-col gap-6 min-h-[100dvh]">
         {/* Header */}
         <header className="flex items-center justify-between shrink-0">
           <div>
@@ -307,7 +357,7 @@ export default function TerminalPage() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 flex gap-6 min-h-0">
+        <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-0">
           {/* Left Column: Terminal */}
           <div className="flex-1 flex flex-col gap-5 min-h-0">
             {/* Timer Card */}
@@ -417,7 +467,7 @@ export default function TerminalPage() {
           </div>
 
           {/* Right Column: Sidebar */}
-          <div className="w-60 shrink-0 flex flex-col gap-5">
+          <div className="hidden md:flex w-60 shrink-0 flex-col gap-5">
             {/* Contribution Graph */}
             <div className="glass rounded-3xl p-6">
               <h3 className="text-sm font-bold text-[#222529] mb-4">Contribution Graph</h3>
@@ -466,7 +516,10 @@ export default function TerminalPage() {
       </main>
 
       {/* ─── Camouflage Overlay ──────────────────────────────────────────────────── */}
-      {isCamouflage && (
+      {isCamouflage && !isDesktop && (
+        <NewsReaderCamouflage onClose={() => setIsCamouflage(false)} />
+      )}
+      {isCamouflage && isDesktop && (
         <div className="fixed inset-0 z-[100] bg-white flex flex-col animate-fade-in">
           {/* Excel-like title bar */}
           <div className="bg-[#f3f2f1] border-b border-[#d6d6d6] px-4 py-2 flex items-center justify-between select-none">

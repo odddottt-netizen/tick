@@ -402,7 +402,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
 
 .stardust-page {
   background: #fcfbf9;
-  min-height: 100vh;
+  min-height: 100dvh;
   color: #5a5651;
   overflow: hidden;
   position: relative;

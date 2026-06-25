@@ -182,6 +182,7 @@ export default function PraisePage() {
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState<string | null>(null);
   const [escapeMode, setEscapeMode] = useState<false | "aws" | "license">(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -222,6 +223,14 @@ export default function PraisePage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [escapeMode]);
+
+  /* isDesktop detection */
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   /* Auto-scroll to bottom */
   useEffect(() => {
@@ -370,6 +379,7 @@ export default function PraisePage() {
   /* ─────────────────── Render ─────────────────── */
 
   if (escapeMode) {
+    if (!isDesktop) return <KakaoCamouflageForPraise onClose={() => setEscapeMode(false)} />;
     return escapeMode === "aws" ? (
       <AwsConsole onClose={() => setEscapeMode(false)} />
     ) : (
@@ -379,14 +389,19 @@ export default function PraisePage() {
 
   return (
     <div
-      className="flex h-screen w-full overflow-hidden"
+      className="flex min-h-[100dvh] h-[100dvh] w-full overflow-hidden select-none"
       style={{
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Noto Sans KR', sans-serif",
+        touchAction: "manipulation",
+        wordBreak: "keep-all",
+        overflowWrap: "break-word",
+        WebkitUserSelect: "none",
+        userSelect: "none",
       }}
     >
       {/* ─── Sidebar ─── */}
-      <aside className="flex w-[260px] flex-shrink-0 flex-col bg-[#1a1d21] text-[#ababad]">
+      <aside className="hidden md:flex w-[260px] flex-shrink-0 flex-col bg-[#1a1d21] text-[#ababad]">
         {/* Workspace header */}
         <div className="flex h-[61px] items-center border-b border-[#00000030] px-4 hover:bg-[#272a2e] cursor-pointer">
           <div className="flex-1">
@@ -510,7 +525,7 @@ export default function PraisePage() {
       </aside>
 
       {/* ─── Main ─── */}
-      <main className="flex flex-1 flex-col bg-white">
+      <main className="flex flex-1 flex-col bg-white" style={{ touchAction: "manipulation" }}>
         {/* Header */}
         <header className="flex h-[61px] items-center border-b border-[#e2e2e2] px-5">
           <div className="flex items-center gap-2">
@@ -570,7 +585,7 @@ export default function PraisePage() {
                     {formatTime(msg.timestamp)}
                   </span>
                 </div>
-                <div className="mt-0.5 text-[15px] leading-relaxed text-[#1d1c1d] whitespace-pre-wrap">
+                <div className="mt-0.5 text-[15px] leading-relaxed text-[#1d1c1d] whitespace-pre-wrap select-text">
                   {msg.text}
                 </div>
                 {msg.reactions && msg.reactions.length > 0 && (
@@ -612,34 +627,34 @@ export default function PraisePage() {
           <div className="praise-input-area bg-white">
             {/* Format toolbar */}
             <div className="flex items-center gap-1 border-b border-[#e2e2e2] px-3 py-1.5">
-              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d]">
+              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <Bold className="h-4 w-4" />
               </button>
-              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d]">
+              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <Italic className="h-4 w-4" />
               </button>
-              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d]">
+              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <Strikethrough className="h-4 w-4" />
               </button>
               <div className="mx-1 h-4 w-px bg-[#e2e2e2]" />
-              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d]">
+              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <Link className="h-4 w-4" />
               </button>
-              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d]">
+              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <List className="h-4 w-4" />
               </button>
-              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d]">
+              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <Code className="h-4 w-4" />
               </button>
               <div className="mx-1 h-4 w-px bg-[#e2e2e2]" />
-              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d]">
+              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <Smile className="h-4 w-4" />
               </button>
-              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d]">
+              <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                 <AtSign className="h-4 w-4" />
               </button>
               <div className="ml-auto flex items-center gap-1">
-                <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d]">
+                <button className="rounded p-1 text-[#616061] hover:bg-[#f4f4f4] hover:text-[#1d1c1d] min-h-[44px] min-w-[44px] flex items-center justify-center">
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
@@ -686,6 +701,47 @@ export default function PraisePage() {
           </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+/* ─────────────────── Mobile Kakao Camouflage ─────────────────── */
+function KakaoCamouflageForPraise({ onClose }: { onClose: () => void }) {
+  const msgs = [
+    { from: '박팀장', text: '오늘 배포 정말 수고하셨어요! 덕분에 무사히 완료했습니다 👏', time: '10:22', mine: false },
+    { from: 'me', text: '감사해요! 같이 열심히 해주셔서 가능했습니다 😊', time: '10:23', mine: true },
+    { from: '이대리', text: '진짜 오늘 제일 빠른 배포였어요 ㅋㅋ 최고십니다', time: '10:24', mine: false },
+    { from: 'me', text: '앞으로도 잘 부탁드려요 🙏', time: '10:25', mine: true },
+    { from: '김과장', text: '대표님도 칭찬하셨어요! 정말 잘했다고요', time: '10:26', mine: false },
+  ];
+  return (
+    <div className="fixed inset-0 z-[100] flex flex-col" style={{ fontFamily: '"Noto Sans KR",sans-serif', background: '#b2c7d9' }} onDoubleClick={onClose}>
+      <div style={{ background: '#4a7fb5', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#ffd84d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>👥</div>
+        <div>
+          <div style={{ fontSize: '15px', fontWeight: 600, color: '#fff' }}>팀 단체채팅방</div>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>멤버 5명</div>
+        </div>
+        <button onClick={onClose} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#fff', fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '8px', touchAction: 'pan-y' }}>
+        {msgs.map((m, i) => (
+          <div key={i} style={{ display: 'flex', flexDirection: m.mine ? 'row-reverse' : 'row', alignItems: 'flex-end', gap: '6px' }}>
+            {!m.mine && (
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#8FA89A', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#fff' }}>{m.from[0]}</div>
+            )}
+            <div style={{ maxWidth: '72%' }}>
+              {!m.mine && <div style={{ fontSize: '11px', color: '#444', marginBottom: '2px', marginLeft: '2px' }}>{m.from}</div>}
+              <div style={{ background: m.mine ? '#ffd84d' : '#fff', borderRadius: m.mine ? '12px 2px 12px 12px' : '2px 12px 12px 12px', padding: '8px 12px', fontSize: '13px', color: '#111', lineHeight: 1.5, boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }}>{m.text}</div>
+              <div style={{ fontSize: '10px', color: '#555', marginTop: '2px', textAlign: m.mine ? 'left' : 'right' }}>{m.time}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: '#fff', padding: '10px 14px', borderTop: '1px solid #ddd', display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ flex: 1, background: '#f5f5f5', borderRadius: '20px', padding: '8px 14px', fontSize: '13px', color: '#aaa' }}>메시지 입력</div>
+        <div style={{ fontSize: '18px', color: '#4a7fb5' }}>▶</div>
+      </div>
     </div>
   );
 }

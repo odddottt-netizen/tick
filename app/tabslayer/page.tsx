@@ -246,6 +246,97 @@ function playKeepSound() {
 }
 
 /* ─── Main Component ─────────────────────────────────────────────────────── */
+/* ─── Notion DB Camouflage ─────────────────────────────────────────────────── */
+function NotionDBCamouflage({ onBack, isDesktop }: { onBack: () => void; isDesktop: boolean }) {
+  const rows = [
+    { name: 'Q2 전략기획 검토 보고', status: '진행 중', date: '2026-06-25', who: '김팀장' },
+    { name: '하반기 마케팅 캘린더 초안', status: '완료', date: '2026-06-22', who: '이대리' },
+    { name: '신제품 출시 로드맵 v2', status: '검토 필요', date: '2026-06-30', who: '박차장' },
+    { name: '팀원 성과 평가 문서', status: '대기', date: '2026-07-05', who: '김팀장' },
+    { name: '예산 집행 현황 보고', status: '진행 중', date: '2026-06-28', who: '최과장' },
+    { name: '고객 피드백 종합 분석', status: '완료', date: '2026-06-18', who: '정주임' },
+  ];
+  const sc = (s: string) => {
+    if (s === '완료') return { bg: '#d3f9d8', c: '#2f9e44' };
+    if (s === '진행 중') return { bg: '#dbe4ff', c: '#3b5bdb' };
+    if (s === '검토 필요') return { bg: '#fff3bf', c: '#e67700' };
+    return { bg: '#f1f3f5', c: '#868e96' };
+  };
+
+  if (!isDesktop) {
+    return (
+      <div className="fixed inset-0 z-[100] flex flex-col" style={{ fontFamily: '"Noto Sans KR","Apple SD Gothic Neo",sans-serif', background: '#fff' }} onDoubleClick={onBack}>
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid #e9e9e7', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '15px', fontWeight: 600, color: '#37352f' }}>📋 작업 관리</span>
+          <span style={{ fontSize: '12px', color: '#9b9a97' }}>···</span>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {rows.map((r, i) => {
+            const { bg, c } = sc(r.status);
+            return (
+              <div key={i} style={{ padding: '12px 16px', borderBottom: '1px solid #f0efee' }}>
+                <div style={{ fontSize: '14px', color: '#37352f', marginBottom: '5px', fontWeight: 500 }}>{r.name}</div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{ background: bg, color: c, borderRadius: '4px', padding: '2px 8px', fontSize: '11px', fontWeight: 500 }}>{r.status}</span>
+                  <span style={{ fontSize: '11px', color: '#9b9a97' }}>{r.date}</span>
+                  <span style={{ fontSize: '11px', color: '#9b9a97' }}>{r.who}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ padding: '8px', textAlign: 'center', fontSize: '11px', color: '#c1c0be', borderTop: '1px solid #f0efee' }}>더블탭으로 돌아가기</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex" style={{ fontFamily: '"Noto Sans KR","Apple SD Gothic Neo",sans-serif', background: '#fff' }}>
+      <div style={{ width: '220px', background: '#f7f6f5', borderRight: '1px solid #e9e9e7', flexShrink: 0, display: 'flex', flexDirection: 'column', padding: '16px 0' }}>
+        <div style={{ padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <div style={{ width: '24px', height: '24px', background: '#e8d5c4', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px' }}>🗂️</div>
+          <span style={{ fontWeight: 600, fontSize: '13px', color: '#37352f' }}>내 작업공간</span>
+        </div>
+        {['🔍 검색', '📅 오늘', '📋 작업 관리', '📝 메모', '📊 주간 보고'].map((item, i) => (
+          <div key={i} style={{ padding: '6px 16px', fontSize: '13px', color: '#37352f', background: i === 2 ? 'rgba(0,0,0,0.05)' : 'transparent' }}>{item}</div>
+        ))}
+        <div style={{ marginTop: 'auto', padding: '10px 16px', fontSize: '10px', color: '#b7b7b4', borderTop: '1px solid #e9e9e7', cursor: 'default' }} onDoubleClick={onBack}>더블클릭: 돌아가기</div>
+      </div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ padding: '6px 16px', borderBottom: '1px solid #e9e9e7', fontSize: '12px', color: '#9b9a97', display: 'flex', gap: '4px', alignItems: 'center' }}>
+          <span>작업 관리</span><span>/</span><span style={{ color: '#37352f', fontWeight: 500 }}>전체 현황</span>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '32px 48px' }}>
+          <div style={{ fontSize: '30px', marginBottom: '8px' }}>📋</div>
+          <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#37352f', marginBottom: '20px' }}>작업 관리 — 전체 현황</h1>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', color: '#37352f' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #e9e9e7' }}>
+                {['Aa 소제목', '◉ 상태', '📅 마감일', '👤 담당자'].map((h) => (
+                  <th key={h} style={{ textAlign: 'left', padding: '6px 10px', fontWeight: 500, color: '#9b9a97', fontSize: '12px' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => {
+                const { bg, c } = sc(r.status);
+                return (
+                  <tr key={i} style={{ borderBottom: '1px solid #f0efee' }}>
+                    <td style={{ padding: '8px 10px' }}>{r.name}</td>
+                    <td style={{ padding: '8px 10px' }}><span style={{ background: bg, color: c, borderRadius: '4px', padding: '2px 8px', fontSize: '11px', fontWeight: 500 }}>{r.status}</span></td>
+                    <td style={{ padding: '8px 10px', color: '#9b9a97', fontSize: '12px' }}>{r.date}</td>
+                    <td style={{ padding: '8px 10px', color: '#9b9a97', fontSize: '12px' }}>{r.who}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TabSlayerPage() {
   const [cards, setCards] = useState<CardData[]>(() => shuffleArray([...SAMPLE_CARDS]));
   const [cardIndex, setCardIndex] = useState(0);
@@ -257,14 +348,24 @@ export default function TabSlayerPage() {
   const [showReport, setShowReport] = useState(false);
   const [copied, setCopied] = useState(false);
   const [cardKey, setCardKey] = useState(0);
+  const [camoMode, setCamoMode] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const dragState = useRef({ active: false, startX: 0, startY: 0, currentX: 0, currentY: 0 });
   const flyDistanceRef = useRef(1200);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastTapRef = useRef(0);
 
   /* ─── Effects ─────────────────────────────────────────────────────────── */
   useEffect(() => {
     flyDistanceRef.current = Math.max(window.innerWidth, window.innerHeight) * 1.2;
+  }, []);
+
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
   }, []);
 
   useEffect(() => {
@@ -329,6 +430,7 @@ export default function TabSlayerPage() {
       if (action === 'trash') playTrashSound();
       else if (action === 'archive') playArchiveSound();
       else if (action === 'keep') playKeepSound();
+      if (navigator.vibrate) navigator.vibrate(action === 'keep' ? [20, 10, 20] : 18);
 
       setIsFlying(true);
       const fly = flyDistanceRef.current;
@@ -538,13 +640,22 @@ export default function TabSlayerPage() {
   const progress = cards.length > 0 ? (cardIndex / cards.length) * 100 : 100;
 
   /* ─── Render ────────────────────────────────────────────────────────────── */
+  if (camoMode) {
+    return <NotionDBCamouflage onBack={() => setCamoMode(false)} isDesktop={isDesktop} />;
+  }
+
   return (
     <div
-      className="min-h-screen bg-[#faf9f6] relative overflow-hidden flex flex-col"
+      className="min-h-[100dvh] bg-[#faf9f6] relative overflow-hidden flex flex-col"
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="application"
       aria-label="Tab Slayer 디지털 정리 게임"
+      onDoubleClick={() => {
+        const now = Date.now();
+        if (now - lastTapRef.current < 300) setCamoMode(true);
+        lastTapRef.current = now;
+      }}
     >
       {/* Ambient Background */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
@@ -559,6 +670,12 @@ export default function TabSlayerPage() {
           <h1 className="text-2xl font-bold tracking-tight text-[#4A4A4A]">
             Tab Slayer
           </h1>
+          <button
+            onClick={() => setCamoMode(true)}
+            className="ml-1 text-[11px] px-2 py-0.5 rounded-full border border-[#E8E2D9] text-[#9E9A95] bg-transparent"
+            title="위장 모드"
+            aria-label="위장 모드"
+          >🛡</button>
         </div>
         <p className="text-center text-sm text-[#9E9A95]">
           당신의 디지털 공간을 정리하는 힐링 리추얼
@@ -606,6 +723,7 @@ export default function TabSlayerPage() {
                 transform: cardTransform,
                 transition: cardTransition,
                 cursor: isDragging ? 'grabbing' : 'grab',
+                touchAction: 'none',
               }}
               onPointerDown={handlePointerDown}
               onPointerMove={handlePointerMove}

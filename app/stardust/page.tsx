@@ -55,6 +55,45 @@ const SAND_COLORS = [
   '#d8cfc0', '#e0d8d0', '#c0b5a5', '#b0a08a', '#d0c8b8',
 ];
 
+// ─── Notion Doc Camouflage ────────────────────────────────────────────────
+function NotionDocCamouflage({ onClose }: { onClose: () => void }) {
+  const sections = [
+    { heading: '📌 이번 분기 핵심 목표', body: '브랜드 인지도 확대와 신규 고객 유입을 중심으로 채널별 성과 지표를 재정의한다. 특히 유튜브 쇼핑과 스마트스토어 연계 프로모션을 통해 전환율을 전분기 대비 15% 향상시키는 것을 목표로 한다.' },
+    { heading: '🗂 주요 업무 현황', body: 'SS 시즌 신상품 7종 기획 완료. 상세페이지 제작 3건 진행 중. 카카오 채널 자동화 메시지 A/B 테스트 결과 분석 대기 상태. 데이터랩 기반 키워드 보고서 초안 작성 완료.' },
+    { heading: '📊 채널별 주간 리뷰', body: '자사몰 방문자 전주 대비 +8%. 스마트스토어 클릭률 3.2%로 카테고리 평균 상회. 유튜브 라이브 시청자 수 감소 추세 — 방송 시간대 조정 검토 필요.' },
+    { heading: '⚠️ 리스크 및 이슈', body: '주력 원단 공급사 납기 2주 지연 통보 수신. FW 시즌 첫 출시 일정 조정 필요. 경쟁사 오르(Orr) 동일 가격대 신상품 출시 예고 — 포지셔닝 차별화 전략 재검토 요망.' },
+  ];
+  return (
+    <div
+      className="fixed inset-0 z-[100] overflow-auto"
+      style={{ background: '#ffffff', fontFamily: "'Noto Sans KR', system-ui, sans-serif" }}
+      onDoubleClick={onClose}
+    >
+      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '48px 32px 80px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+          <span style={{ fontSize: '22px' }}>📄</span>
+          <span style={{ fontSize: '13px', color: '#b0b0b0' }}>데뮤즈 / 팀장 업무 노트</span>
+        </div>
+        <h1 style={{ fontSize: '30px', fontWeight: 700, color: '#1a1a1a', marginBottom: '8px', wordBreak: 'keep-all' }}>
+          2026 SS 시즌 운영 현황 & 전략 메모
+        </h1>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '36px', flexWrap: 'wrap' }}>
+          {['마케팅', '전략', '시즌기획'].map(tag => (
+            <span key={tag} style={{ fontSize: '12px', background: '#f1f0ef', color: '#787774', borderRadius: '4px', padding: '2px 8px' }}>{tag}</span>
+          ))}
+        </div>
+        {sections.map((s, i) => (
+          <div key={i} style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '16px', fontWeight: 600, color: '#1a1a1a', marginBottom: '8px', wordBreak: 'keep-all' }}>{s.heading}</h2>
+            <p style={{ fontSize: '15px', lineHeight: 1.75, color: '#37352f', wordBreak: 'keep-all' }}>{s.body}</p>
+          </div>
+        ))}
+        <p style={{ fontSize: '11px', color: '#d0d0d0', textAlign: 'center', marginTop: '48px' }}>더블탭하여 돌아가기</p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Component ─────────────────────────────────────────────────────────────
 export default function StardustVentPage() {
   // Refs
@@ -78,6 +117,7 @@ export default function StardustVentPage() {
   const [bossMode, setBossMode] = useState(false);
   const [showBossHint, setShowBossHint] = useState(false);
   const [renderTick, setRenderTick] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   // ─── Matter.js Init ───────────────────────────────────────────────────────
   const initPhysics = useCallback(() => {
@@ -187,6 +227,7 @@ export default function StardustVentPage() {
 
     // Play ASMR sound
     playVentSound();
+    if (navigator.vibrate) navigator.vibrate(300);
 
     // Generate particles from each block
     const canvas = canvasRef.current;
@@ -427,7 +468,15 @@ export default function StardustVentPage() {
     };
   }, [initPhysics, triggerBossMode]);
 
+  useEffect(() => {
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   // ─── Render ─────────────────────────────────────────────────────────────────
+  if (bossMode) return <NotionDocCamouflage onClose={() => setBossMode(false)} />;
   return (
     <div className="stardust-page">
       {/* Header */}
