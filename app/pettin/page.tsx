@@ -348,18 +348,6 @@ function PettinGame({ onToggleCamo }: { onToggleCamo: () => void }) {
               </div>
             </div>
           )}
-          {isGameOver && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-stone-800 text-lg font-semibold drop-shadow-sm text-center px-4">
-                {gameState === "gameover-fast" ? "은별이가 깜짝 놀라 도망쳤어요!" : "오래 멈춘 손길에 외로워합니다"}
-              </p>
-            </div>
-          )}
-          {isClear && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <p className="text-stone-800 text-lg font-semibold drop-shadow-sm">은별이가 행복해졌어요 🐾</p>
-            </div>
-          )}
         </div>
         {/* 파티클 레이어 */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
@@ -371,12 +359,20 @@ function PettinGame({ onToggleCamo }: { onToggleCamo: () => void }) {
         </div>
       </div>
 
-      {/* 게임오버 / 클리어 버튼 */}
+      {/* 게임오버 / 클리어 문구 + 버튼 */}
       {isGameOver && (
-        <button onClick={restart} className="mb-4 px-6 py-2.5 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-700 transition shadow-md">다시 시작</button>
+        <div className="flex flex-col items-center gap-3 mb-4">
+          <p className="text-stone-700 text-base font-semibold text-center">
+            {gameState === "gameover-fast" ? "은별이가 깜짝 놀라 도망쳤어요!" : "오래 멈춘 손길에 외로워합니다"}
+          </p>
+          <button onClick={restart} className="px-6 py-2.5 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-700 transition shadow-md">다시 시작</button>
+        </div>
       )}
       {isClear && (
-        <button onClick={restart} className="mb-4 px-6 py-2.5 bg-rose-400 text-white text-sm rounded-full hover:bg-rose-500 transition shadow-md">다시 쓰다듬기</button>
+        <div className="flex flex-col items-center gap-3 mb-4">
+          <p className="text-stone-700 text-base font-semibold text-center">은별이가 행복해졌어요 🐾</p>
+          <button onClick={restart} className="px-6 py-2.5 bg-rose-400 text-white text-sm rounded-full hover:bg-rose-500 transition shadow-md">다시 쓰다듬기</button>
+        </div>
       )}
 
       {/* 하단 가이드 + 위장 버튼 */}
