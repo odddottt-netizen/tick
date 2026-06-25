@@ -361,7 +361,7 @@ export default function TerminalPage() {
           {/* Left Column: Terminal */}
           <div className="flex-1 flex flex-col gap-5 min-h-0">
             {/* Timer Card */}
-            <div className="glass rounded-3xl p-6 flex items-center justify-between shrink-0">
+            <div className="glass rounded-3xl p-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between shrink-0">
               <div className="flex items-center gap-5">
                 <div className="w-14 h-14 rounded-2xl bg-[#0a0a0a] flex items-center justify-center shadow-inner">
                   <span className={`text-2xl font-mono font-bold ${textColor}`}>
@@ -378,28 +378,28 @@ export default function TerminalPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={handleStart}
-                  className="px-5 py-2.5 rounded-2xl bg-[#222529] text-[#faf8f5] text-sm font-semibold hover:bg-[#0a0a0a] transition-all active:scale-95"
+                  className="px-3 md:px-5 py-2.5 rounded-2xl bg-[#222529] text-[#faf8f5] text-sm font-semibold hover:bg-[#0a0a0a] transition-all active:scale-95"
                 >
                   Start
                 </button>
                 <button
                   onClick={handlePause}
-                  className="px-5 py-2.5 rounded-2xl glass text-sm font-semibold text-[#4A4A4A] hover:bg-white/80 transition-all active:scale-95"
+                  className="px-3 md:px-5 py-2.5 rounded-2xl glass text-sm font-semibold text-[#4A4A4A] hover:bg-white/80 transition-all active:scale-95"
                 >
                   Pause
                 </button>
                 <button
                   onClick={handleReset}
-                  className="px-5 py-2.5 rounded-2xl glass text-sm font-semibold text-[#4A4A4A] hover:bg-white/80 transition-all active:scale-95"
+                  className="px-3 md:px-5 py-2.5 rounded-2xl glass text-sm font-semibold text-[#4A4A4A] hover:bg-white/80 transition-all active:scale-95"
                 >
                   Reset
                 </button>
                 <button
                   onClick={toggleMode}
-                  className="px-5 py-2.5 rounded-2xl glass text-sm font-semibold text-[#4A4A4A] hover:bg-white/80 transition-all active:scale-95"
+                  className="px-3 md:px-5 py-2.5 rounded-2xl glass text-sm font-semibold text-[#4A4A4A] hover:bg-white/80 transition-all active:scale-95"
                 >
                   {mode === 'focus' ? 'Break' : 'Focus'}
                 </button>

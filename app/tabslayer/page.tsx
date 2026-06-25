@@ -774,7 +774,7 @@ export default function TabSlayerPage() {
 
                 {/* Text */}
                 <div className="flex-1 flex flex-col items-center text-center">
-                  <h3 className="text-lg font-bold text-[#4A4A4A] leading-snug mb-2 line-clamp-2">
+                  <h3 className="text-lg font-bold text-[#4A4A4A] leading-snug mb-2 line-clamp-2 break-all">
                     {currentCard.title}
                   </h3>
                   <p className="text-sm text-[#9E9A95]">{currentCard.subtitle}</p>

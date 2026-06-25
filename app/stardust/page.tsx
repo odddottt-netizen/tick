@@ -506,7 +506,7 @@ export default function StardustVentPage() {
         </form>
 
         {/* Actions */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-3">
           <button
             type="button"
             onClick={handleSubmit}

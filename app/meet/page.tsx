@@ -650,7 +650,7 @@ export default function MeetEscapePage() {
           <div className="text-sm font-medium text-[#e8eaed]">Weekly Business Review</div>
           <div className="px-2 py-0.5 rounded bg-[#ea4335]/20 text-[#ea4335] text-xs font-medium">LIVE</div>
         </div>
-        <div className="text-xs text-[#9aa0a6]">10:06 AM · meet.google.com/abc-defg-hij</div>
+        <div className="text-xs text-[#9aa0a6] hidden md:block">10:06 AM · meet.google.com/abc-defg-hij</div>
       </div>
 
       {/* Main Content Area */}
