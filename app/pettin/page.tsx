@@ -337,12 +337,11 @@ function PettinGame({ onToggleCamo }: { onToggleCamo: () => void }) {
       {/* 메인 이미지 영역 */}
       <div className="relative w-full max-w-sm aspect-square mb-6">
         <div ref={imgWrapRef} className="relative w-full h-full rounded-3xl border border-stone-200 overflow-hidden cursor-grab active:cursor-grabbing bg-white shadow-xl shadow-stone-200/50">
-          <img src={currentImg} alt="은별이" className={`w-full h-full object-cover transition-opacity duration-500 ${isGameOver ? "opacity-90" : "opacity-100"}`} draggable={false} />
-          {isGameOver && <div className="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" />}
+          <img src={currentImg} alt="은별이" className="w-full h-full object-cover transition-opacity duration-500" draggable={false} />
           <div className="absolute inset-0 bg-blue-200/40 pointer-events-none transition-opacity" style={{ opacity: neglectOpacity }} />
           {isClear && <div className="absolute top-4 left-1/2 -translate-x-1/2 text-4xl animate-bounce">🎉</div>}
           {showBubble && (
-            <div className="absolute top-[15%] left-1/2 -translate-x-1/2 animate-[fadeIn_0.5s_ease]">
+            <div className="absolute top-[6%] left-1/2 -translate-x-1/2 animate-[fadeIn_0.5s_ease]">
               <div className="relative bg-white/90 px-5 py-3 rounded-2xl rounded-bl-none shadow-lg border border-stone-100">
                 <p className="text-stone-700 text-sm font-medium tracking-wide">{bubbleText}</p>
                 <div className="absolute -bottom-2 left-4 w-4 h-4 bg-white/90 border-b border-r border-stone-100 rotate-45" />
@@ -351,18 +350,14 @@ function PettinGame({ onToggleCamo }: { onToggleCamo: () => void }) {
           )}
           {isGameOver && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-stone-800 text-lg font-semibold mb-1">{gameState === "gameover-fast" ? "은별이가 깜짝 놀라 도망쳤어요!" : "오래 멈춘 손길에 외로워합니다"}</p>
-                <button onClick={restart} className="mt-3 px-5 py-2 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-700 transition">다시 시작</button>
-              </div>
+              <p className="text-stone-800 text-lg font-semibold drop-shadow-sm text-center px-4">
+                {gameState === "gameover-fast" ? "은별이가 깜짝 놀라 도망쳤어요!" : "오래 멈춘 손길에 외로워합니다"}
+              </p>
             </div>
           )}
           {isClear && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-stone-800 text-lg font-semibold">은별이가 행복해졌어요 🐾</p>
-                <button onClick={restart} className="mt-3 px-5 py-2 bg-rose-400 text-white text-sm rounded-full hover:bg-rose-500 transition">다시 쓰다듬기</button>
-              </div>
+              <p className="text-stone-800 text-lg font-semibold drop-shadow-sm">은별이가 행복해졌어요 🐾</p>
             </div>
           )}
         </div>
@@ -375,6 +370,14 @@ function PettinGame({ onToggleCamo }: { onToggleCamo: () => void }) {
           ))}
         </div>
       </div>
+
+      {/* 게임오버 / 클리어 버튼 */}
+      {isGameOver && (
+        <button onClick={restart} className="mb-4 px-6 py-2.5 bg-stone-800 text-white text-sm rounded-full hover:bg-stone-700 transition shadow-md">다시 시작</button>
+      )}
+      {isClear && (
+        <button onClick={restart} className="mb-4 px-6 py-2.5 bg-rose-400 text-white text-sm rounded-full hover:bg-rose-500 transition shadow-md">다시 쓰다듬기</button>
+      )}
 
       {/* 하단 가이드 + 위장 버튼 */}
       <div className="text-center text-xs text-stone-400 space-y-1 mb-4">
